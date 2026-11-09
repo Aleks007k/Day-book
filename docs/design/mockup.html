@@ -2,103 +2,123 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Дневник — макеты 3</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/caveat@5.3.0/400.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/caveat@5.3.0/600.css">
+<title>Дневник — макеты 4</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded@5.3.0/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded@5.3.0/700.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.3.0/600.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.3.0/700.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/pangolin@5.3.0/400.css">
 <style>
-  .light { --paper: #F6F8FB; --ink: #1C3A8A; --ink-soft: #3456A6; --ink-wet: #4D6BB5; --line: #DCE3F0; }
-  .dark  { --paper: #101C35; --ink: #C3D0EE; --ink-soft: #8EA6D9; --ink-wet: #6E86BC; --line: #22325A; }
-  /* шрифты: размеры подобраны так, чтобы строки были одной визуальной высоты */
-  .f-pangolin { --font: "Pangolin"; --fs: 19px; --lh: 1.6; --date: 38px; --small: 16px; --dw: 400; }
-  .f-caveat   { --font: "Caveat";   --fs: 25px; --lh: 1.35; --date: 48px; --small: 22px; --dw: 600; }
+  /* Тёмная — основная, как «Борт №1». Акцент — синие чернила. */
+  .dark {
+    --bg: #0F1115; --panel: #191C22; --track: #22262E; --line: #2C313A;
+    --text: #F4F1EA; --soft: #C9CDD3; --muted: #9AA0AA; --dim: #5C626C;
+    --accent: #7CB7FF; --on-accent: #0A1424; --accent-dark: #142235; --rec: #FF5A4E;
+  }
+  .light {
+    --bg: #F3F4F6; --panel: #FFFFFF; --track: #E6E9EE; --line: #DDE1E7;
+    --text: #15181D; --soft: #3A4049; --muted: #5E6570; --dim: #A3A9B2;
+    --accent: #1F5FD1; --on-accent: #FFFFFF; --accent-dark: #E3ECFB; --rec: #D93A2F;
+  }
+  body { margin: 0; background: #555; display: flex; gap: 24px; padding: 24px; flex-wrap: wrap; }
+  .phone { width: 384px; height: 854px; position: relative; overflow: hidden; background: var(--bg); color: var(--text);
+    font-family: "Manrope", sans-serif; }
+  .status { height: 30px; display: flex; justify-content: space-between; align-items: center; padding: 0 22px;
+    font: 600 13px "Manrope"; color: var(--muted); }
+  .wrap { padding: 14px 16px 0; }
 
-  body { margin: 0; background: #888; display: flex; gap: 24px; padding: 24px; flex-wrap: wrap; }
-  .phone { width: 384px; height: 854px; position: relative; overflow: hidden;
-    background: var(--paper); color: var(--ink); font-family: var(--font), cursive; }
-  .status { height: 30px; display: flex; justify-content: space-between; align-items: center;
-    padding: 0 22px; font: 13px system-ui, sans-serif; color: var(--ink-soft); }
+  .top { display: flex; align-items: center; gap: 10px; }
+  .top .titles { flex: 1; }
+  .cap { font: 700 12.5px "Manrope"; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
+  .big { font: 700 30px "Unbounded"; line-height: 1.15; letter-spacing: -.3px; margin-top: 4px; }
+  .sq { width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--text); flex: none; box-sizing: border-box; }
 
-  header { padding: 30px 28px 0; position: relative; }
-  .wd { font-size: var(--small); color: var(--ink-soft); }
-  .date { font-size: var(--date); font-weight: var(--dw); line-height: 1.05; margin-top: 2px; }
-  .icon-btn { position: absolute; right: 24px; top: 30px; color: var(--ink); }
+  .list { position: absolute; left: 16px; right: 16px; top: 128px; bottom: 176px; overflow: hidden; display: flex; flex-direction: column; gap: 10px; }
+  .list.end { justify-content: flex-end; }
+  .entry { background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 14px 18px 16px; }
+  .entry .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .entry .t { font: 700 15px "Unbounded"; color: var(--accent); letter-spacing: .2px; }
+  .entry .lang { font: 700 11.5px "Manrope"; letter-spacing: 1px; color: var(--muted); }
+  .entry .x { font-family: "Pangolin"; font-size: 18.5px; line-height: 1.5; color: var(--text); }
+  .entry .tags { margin-top: 10px; display: flex; gap: 6px; }
+  .chip { font: 700 12.5px "Manrope"; color: var(--accent); background: var(--accent-dark); padding: 5px 10px; border-radius: 10px; }
+  .foreign { color: var(--soft); text-decoration: underline; text-decoration-color: var(--dim); text-underline-offset: 4px; text-decoration-thickness: 1px; }
+  .wet { color: var(--muted); }
+  .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--accent); vertical-align: -0.18em; margin-left: 2px; border-radius: 1px; }
+  .entry.live { border-color: var(--accent); }
+  .fade-b { position: absolute; left: 0; right: 0; bottom: 176px; height: 36px; background: linear-gradient(transparent, var(--bg)); }
+  .fade-t { position: absolute; left: 0; right: 0; top: 128px; height: 36px; background: linear-gradient(var(--bg), transparent); }
 
-  .entries { position: absolute; left: 28px; right: 28px; top: 150px; bottom: 150px; overflow: hidden; }
-  .entries.end { display: flex; flex-direction: column; justify-content: flex-end; }
-  .entry { margin-bottom: 30px; }
-  .entry .t { font-size: var(--small); color: var(--ink-soft); margin-bottom: 2px; font-variant-numeric: tabular-nums; }
-  .entry .x { font-size: var(--fs); line-height: var(--lh); }
-  .tag { color: var(--ink-soft); white-space: nowrap; }
-  .foreign { color: var(--ink-soft); }
-  .wet { color: var(--ink-wet); }
-  .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--ink); vertical-align: -0.18em; margin-left: 2px; border-radius: 1px; }
-  .fade-b { position: absolute; left: 0; right: 0; bottom: 150px; height: 40px; background: linear-gradient(transparent, var(--paper)); }
-  .fade-t { position: absolute; left: 0; right: 0; top: 150px; height: 40px; background: linear-gradient(var(--paper), transparent); }
-
-  .bottom { position: absolute; left: 0; right: 0; bottom: 34px; }
-  .timer { text-align: center; font-size: var(--small); color: var(--ink-soft); height: 24px; font-variant-numeric: tabular-nums; }
-  .controls { display: grid; grid-template-columns: 1fr 68px 1fr; align-items: center; margin-top: 4px; }
-  .langs { display: flex; gap: 24px; font-size: var(--small); color: var(--ink-soft); }
-  .langs.l { justify-content: flex-end; padding-right: 28px; }
-  .langs.r { justify-content: flex-start; padding-left: 28px; }
-  .langs span { position: relative; }
-  .langs .on { color: var(--ink); }
-  .langs .on::after { content: ""; position: absolute; left: 50%; bottom: -9px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: var(--ink); }
-  .langs .off { opacity: .35; }
-  .mic { width: 68px; height: 68px; border-radius: 50%; background: var(--ink); display: flex; align-items: center; justify-content: center; }
+  .dock { position: absolute; left: 16px; right: 16px; bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
+  .seg { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 4px; gap: 4px; height: 52px; box-sizing: border-box; }
+  .seg span { display: flex; align-items: center; justify-content: center; border-radius: 14px; font: 700 15px "Unbounded"; color: var(--muted); }
+  .seg span.on { background: var(--track); color: var(--text); box-shadow: inset 0 0 0 1px var(--accent); }
+  .seg.locked span:not(.on) { color: var(--dim); }
+  .btn { height: 72px; border-radius: 24px; background: var(--accent); color: var(--on-accent); display: flex; align-items: center; justify-content: center; gap: 12px; font: 700 20px "Unbounded"; }
+  .btn.rec { background: var(--accent-dark); color: var(--text); border: 1.5px solid var(--accent); justify-content: space-between; padding: 0 22px; box-sizing: border-box; }
+  .btn.rec .dot { width: 12px; height: 12px; border-radius: 6px; background: var(--rec); display: inline-block; margin-right: 10px; }
+  .btn.rec .stop { width: 46px; height: 46px; border-radius: 14px; background: var(--accent); display: flex; align-items: center; justify-content: center; }
   .navpill { position: absolute; bottom: 8px; left: 50%; width: 108px; margin-left: -54px; height: 4px; border-radius: 2px; background: var(--line); }
 
-  .cal-h { padding: 30px 28px 0; display: flex; justify-content: space-between; align-items: flex-end; }
-  .cal-h .m { font-size: var(--date); font-weight: var(--dw); line-height: 1.05; }
-  .cal-h .y { font-size: var(--small); color: var(--ink-soft); }
-  .cal-h .arrows { display: flex; gap: 22px; color: var(--ink-soft); padding-bottom: 8px; }
-  .days { display: grid; grid-template-columns: repeat(7, 1fr); padding: 34px 16px 0; row-gap: 4px; }
-  .days .w { text-align: center; font-size: var(--small); color: var(--ink-soft); padding-bottom: 14px; }
-  .days .d { height: 50px; display: flex; align-items: center; justify-content: center; position: relative; font-size: var(--fs); }
-  .days .d.fut { color: var(--ink-soft); opacity: .55; }
-  .days .d.has::after { content: ""; position: absolute; bottom: 4px; width: 4.5px; height: 4.5px; border-radius: 50%; background: var(--ink); }
-  .days .d.today span { width: 40px; height: 40px; border-radius: 50%; background: var(--ink); color: var(--paper); display: flex; align-items: center; justify-content: center; }
+  /* календарь */
+  .calp { margin-top: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 16px 10px 12px; }
+  .days { display: grid; grid-template-columns: repeat(7, 1fr); row-gap: 6px; }
+  .days .w { text-align: center; font: 700 11.5px "Manrope"; letter-spacing: 1px; color: var(--muted); padding-bottom: 8px; text-transform: uppercase; }
+  .days .d { height: 44px; margin: 0 3px; border-radius: 14px; display: flex; flex-direction: column; align-items: center; justify-content: center; font: 500 15px "Unbounded"; position: relative; }
+  .days .d.fut { color: var(--dim); }
+  .days .d.has { background: var(--track); }
+  .days .d.has::after { content: ""; width: 5px; height: 5px; border-radius: 3px; background: var(--accent); position: absolute; bottom: 6px; }
+  .days .d.today { background: var(--accent); color: var(--on-accent); font-weight: 700; }
+  .days .d.today::after { background: var(--on-accent); }
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 14px 16px; }
+  .stat .n { font: 700 26px "Unbounded"; margin-top: 6px; }
+  .stat .n small { font: 600 14px "Manrope"; color: var(--muted); margin-left: 4px; }
 </style>
 </head>
 <body>
 <div id="out"></div>
 <script>
-const MIC = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="var(--paper)" stroke-width="1.8" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/></svg>`;
-const STOP = `<svg width="20" height="20" viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="3" fill="var(--paper)"/></svg>`;
-const SEARCH = `<svg class="icon-btn" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></svg>`;
-const L = (x) => `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="${x}"/></svg>`;
+const I = (d, s = 22, w = 1.8) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const SEARCH = I(`<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/>`);
+const CAL = I(`<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>`);
+const MIC = I(`<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/>`, 26, 2.1);
+const STOP = `<svg width="18" height="18" viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" rx="3.5" fill="var(--on-accent)"/></svg>`;
+const BACK = I(`<path d="M14.5 5 8 12l6.5 7"/>`);
+const FWD = I(`<path d="M9.5 5 16 12l-6.5 7"/>`);
 
-const status = (t) => `<div class="status"><span>${t}</span><span>▮</span></div>`;
-const head = `<header><div class="wd">понедельник</div><div class="date">9 ноября</div>${SEARCH}</header>`;
-const bottom = (rec) => {
-  const s = (x) => `<span class="${x === "RU" ? "on" : rec ? "off" : ""}">${x}</span>`;
-  return `<div class="bottom"><div class="timer">${rec ? "1:24" : ""}</div><div class="controls">
-    <div class="langs l">${s("RU")}${s("UK")}</div><div class="mic">${rec ? STOP : MIC}</div><div class="langs r">${s("EN")}${s("DE")}</div>
-    </div></div><div class="navpill"></div>`;
-};
-const E = (t, x) => `<div class="entry"><div class="t">${t}</div><div class="x">${x}</div></div>`;
-const E1 = E("7:42", `Проснулся раньше будильника. За окном первый снег, всё белое и тихое. Решил не торопиться и выпить кофе у окна. <span class="tag">#утро</span>`);
-const E2 = E("9:15", `Созвон с командой. Обсудили <span class="foreign">roadmap</span> на декабрь, Марина предложила перенести релиз на неделю. Думаю, она права. <span class="tag">#работа</span>`);
-const E3 = E("13:30", `Зайшов до мами. Ґанок увесь у листі, посиділи там із чаєм. Їжак знову приходив у сад — мама каже, він уже як свій. Є відчуття, що осінь цього року довга. <span class="tag">#семья</span>`);
-const E4 = E("18:05", `Quick run along the river after work. Cold, but the light over the water was beautiful. <span class="tag">#спорт</span>`);
-const E5 = E("21:40", `Вечером долго думал о том, что сказала Марина. Наверное, стоит поговорить с ней завтра утром, <span class="wet">пока не начался весь этот</span><span class="caret"></span>`);
+const status = (t) => `<div class="status"><span>${t}</span><span>▮▮</span></div>`;
+const hdr = `<div class="top"><div class="titles"><div class="cap">Понедельник</div><div class="big">9 ноября</div></div>
+  <div class="sq">${SEARCH}</div><div class="sq">${CAL}</div></div>`;
+const seg = (locked) => `<div class="seg ${locked ? "locked" : ""}">${["RU","UK","EN","DE"].map(l => `<span class="${l === "RU" ? "on" : ""}">${l}</span>`).join("")}</div>`;
+const dock = (rec) => `<div class="dock">${seg(rec)}${rec
+  ? `<div class="btn rec"><span><span class="dot"></span>1:24</span><span class="stop">${STOP}</span></div>`
+  : `<div class="btn">${MIC}Говорить</div>`}</div><div class="navpill"></div>`;
 
-const day = (theme, font, id) => `<div class="phone ${theme} f-${font}" id="${id}">${status("21:12")}${head}
-  <div class="entries">${E1}${E2}${E3}</div><div class="fade-b"></div>${bottom(false)}</div>`;
-const dict = (font) => `<div class="phone light f-${font}" id="dict-${font}">${status("21:41")}${head}
-  <div class="entries end">${E2}${E3}${E4}${E5}</div><div class="fade-t"></div>${bottom(true)}</div>`;
+const E = (t, lang, x, tags = [], live = false) => `<div class="entry ${live ? "live" : ""}"><div class="meta"><span class="t">${t}</span><span class="lang">${lang}</span></div>
+  <div class="x">${x}</div>${tags.length ? `<div class="tags">${tags.map(g => `<span class="chip">${g}</span>`).join("")}</div>` : ""}</div>`;
+const E1 = E("7:42", "RU", "Проснулся раньше будильника. За окном первый снег, всё белое и тихое. Решил не торопиться и выпить кофе у окна.", ["утро"]);
+const E2 = E("9:15", "RU", `Созвон с командой. Обсудили <span class="foreign">roadmap</span> на декабрь, Марина предложила перенести релиз на неделю. Думаю, она права.`, ["работа"]);
+const E3 = E("13:30", "UK", "Зайшов до мами. Ґанок увесь у листі, посиділи там із чаєм. Їжак знову приходив у сад — мама каже, він уже як свій. Є відчуття, що осінь цього року довга.", ["семья"]);
+const E4 = E("18:05", "EN", "Quick run along the river after work. Cold, but the light over the water was beautiful.", ["спорт"]);
+const E5 = E("21:40", "RU", `Вечером долго думал о том, что сказала Марина. Наверное, стоит поговорить с ней завтра утром, <span class="wet">пока не начался весь этот</span><span class="caret"></span>`, [], true);
+
+const day = (theme, id) => `<div class="phone ${theme}" id="${id}">${status("21:12")}<div class="wrap">${hdr}</div>
+  <div class="list">${E1}${E2}${E3}</div><div class="fade-b"></div>${dock(false)}</div>`;
+const dict = `<div class="phone dark" id="dict">${status("21:41")}<div class="wrap">${hdr}</div>
+  <div class="list end">${E3}${E4}${E5}</div><div class="fade-t"></div>${dock(true)}</div>`;
 const has = new Set([1, 3, 4, 5, 7, 8]);
-const cal = (font) => {
-  let c = ["пн","вт","ср","чт","пт","сб","вс"].map(w => `<div class="w">${w}</div>`).join("");
-  for (let i = 0; i < 6; i++) c += `<div></div>`;
-  for (let d = 1; d <= 30; d++) c += `<div class="d ${d > 9 ? "fut" : ""} ${has.has(d) ? "has" : ""} ${d === 9 ? "today" : ""}"><span>${d}</span></div>`;
-  return `<div class="phone light f-${font}" id="cal-${font}">${status("21:13")}
-    <div class="cal-h"><div><div class="y">2026</div><div class="m">ноябрь</div></div><div class="arrows">${L("M11.5 3.5 6 9l5.5 5.5")}${L("M6.5 3.5 12 9l-5.5 5.5")}</div></div>
-    <div class="days">${c}</div><div class="navpill"></div></div>`;
-};
-const set = (f) => day("light", f, `day-${f}`) + dict(f) + cal(f) + day("dark", f, `dark-${f}`);
-document.getElementById("out").outerHTML = set("pangolin") + set("caveat");
+let c = ["пн","вт","ср","чт","пт","сб","вс"].map(w => `<div class="w">${w}</div>`).join("");
+for (let i = 0; i < 6; i++) c += `<div></div>`;
+for (let d = 1; d <= 30; d++) c += `<div class="d ${d > 9 ? "fut" : ""} ${has.has(d) ? "has" : ""} ${d === 9 ? "today" : ""}">${d}</div>`;
+const cal = `<div class="phone dark" id="cal">${status("21:13")}<div class="wrap">
+  <div class="top"><div class="sq">${BACK}</div><div class="titles" style="padding-left:4px"><div class="cap">2026</div><div class="big" style="font-size:26px">Ноябрь</div></div><div class="sq">${FWD}</div></div>
+  <div class="calp"><div class="days">${c}</div></div>
+  <div class="stats"><div class="stat"><div class="cap">Дней с записями</div><div class="n">7<small>из 9</small></div></div>
+  <div class="stat"><div class="cap">Записей</div><div class="n">23</div></div></div>
+  </div><div class="navpill"></div></div>`;
+
+document.getElementById("out").outerHTML = day("dark", "day") + dict + cal + day("light", "light");
 </script>
 </body>
 </html>
