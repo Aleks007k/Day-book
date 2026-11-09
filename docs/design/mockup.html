@@ -2,78 +2,69 @@
 <html lang="ru">
 <head>
 <meta charset="utf-8">
-<title>Дневник — макеты 4</title>
+<title>Дневник — лента дней</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded@5.3.0/500.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/unbounded@5.3.0/700.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.3.0/600.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/manrope@5.3.0/700.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/pangolin@5.3.0/400.css">
 <style>
-  /* Тёмная — основная, как «Борт №1». Акцент — синие чернила. */
   .dark {
-    --bg: #0F1115; --panel: #191C22; --track: #22262E; --line: #2C313A;
+    --bg: #0F1115; --open: #161920; --track: #22262E; --line: #22262D; --line2: #2C313A;
     --text: #F4F1EA; --soft: #C9CDD3; --muted: #9AA0AA; --dim: #5C626C;
     --accent: #7CB7FF; --on-accent: #0A1424; --accent-dark: #142235; --rec: #FF5A4E;
   }
   .light {
-    --bg: #F3F4F6; --panel: #FFFFFF; --track: #E6E9EE; --line: #DDE1E7;
+    --bg: #F6F7F9; --open: #FFFFFF; --track: #E6E9EE; --line: #E3E6EB; --line2: #D5DAE1;
     --text: #15181D; --soft: #3A4049; --muted: #5E6570; --dim: #A3A9B2;
     --accent: #1F5FD1; --on-accent: #FFFFFF; --accent-dark: #E3ECFB; --rec: #D93A2F;
   }
   body { margin: 0; background: #555; display: flex; gap: 24px; padding: 24px; flex-wrap: wrap; }
-  .phone { width: 384px; height: 854px; position: relative; overflow: hidden; background: var(--bg); color: var(--text);
-    font-family: "Manrope", sans-serif; }
-  .status { height: 30px; display: flex; justify-content: space-between; align-items: center; padding: 0 22px;
-    font: 600 13px "Manrope"; color: var(--muted); }
-  .wrap { padding: 14px 16px 0; }
+  .phone { width: 384px; height: 854px; position: relative; overflow: hidden; background: var(--bg); color: var(--text); font-family: "Manrope", sans-serif; }
+  .status { height: 30px; display: flex; justify-content: space-between; align-items: center; padding: 0 22px; font: 600 13px "Manrope"; color: var(--muted); }
 
-  .top { display: flex; align-items: center; gap: 10px; }
-  .top .titles { flex: 1; }
-  .cap { font: 700 12.5px "Manrope"; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); }
-  .big { font: 700 30px "Unbounded"; line-height: 1.15; letter-spacing: -.3px; margin-top: 4px; }
-  .sq { width: 48px; height: 48px; border-radius: 14px; border: 1px solid var(--line); display: flex; align-items: center; justify-content: center; color: var(--text); flex: none; box-sizing: border-box; }
+  .hdr { display: flex; align-items: center; padding: 8px 16px 10px 20px; }
+  .hdr .t { flex: 1; font: 700 26px "Unbounded"; letter-spacing: -.3px; }
+  .sq { width: 46px; height: 46px; border-radius: 14px; border: 1px solid var(--line2); display: flex; align-items: center; justify-content: center; color: var(--text); box-sizing: border-box; }
 
-  .list { position: absolute; left: 16px; right: 16px; top: 128px; bottom: 176px; overflow: hidden; display: flex; flex-direction: column; gap: 8px; }
-  .list.end { justify-content: flex-end; }
-  .entry { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 11px 16px 12px; }
-  .entry .meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
-  .entry .t { font: 700 15px "Unbounded"; color: var(--accent); letter-spacing: .2px; }
-  .entry .lang { font: 700 11.5px "Manrope"; letter-spacing: 1px; color: var(--muted); }
-  .entry .x { font-family: "Pangolin"; font-size: 18px; line-height: 1.28; color: var(--text); }
-  .entry .tags { margin-top: 8px; display: flex; gap: 6px; }
-  .chip { font: 700 12.5px "Manrope"; color: var(--accent); background: var(--accent-dark); padding: 3px 9px; border-radius: 9px; }
+  .feed { position: absolute; top: 94px; left: 0; right: 0; bottom: 96px; overflow: hidden; }
+  .feed.end { display: flex; flex-direction: column; justify-content: flex-end; }
+  .month { font: 700 12px "Manrope"; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); padding: 16px 20px 6px; }
+
+  .day { display: grid; grid-template-columns: 42px 1fr; column-gap: 14px; padding: 10px 20px 11px; border-top: 1px solid var(--line); align-items: center; }
+  .month + .day { border-top: none; }
+  .num { text-align: center; }
+  .num b { display: block; font: 700 21px "Unbounded"; line-height: 1.05; }
+  .num i { display: block; font: normal 700 11px "Manrope"; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
+  .day.today .num b { color: var(--accent); }
+  .info { min-width: 0; }
+  .info .meta { font: 600 12.5px "Manrope"; color: var(--muted); display: flex; gap: 6px; }
+  .info .meta .acc { color: var(--accent); }
+  .info .pre { font-family: "Pangolin"; font-size: 17px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--soft); }
+
+  /* раскрытый день */
+  .opened { background: var(--open); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+  .opened .day { border-top: none; grid-template-columns: 42px 1fr 24px; }
+  .opened .chev { color: var(--muted); }
+  .body { padding: 2px 20px 14px 76px; }
+  .e { font-family: "Pangolin"; font-size: 17.5px; line-height: 1.32; margin-bottom: 10px; }
+  .e .tm { font: 700 12.5px "Unbounded"; color: var(--accent); margin-right: 6px; }
+  .e .tag { font: 700 12px "Manrope"; color: var(--accent); white-space: nowrap; margin-left: 4px; }
   .foreign { color: var(--soft); text-decoration: underline; text-decoration-color: var(--dim); text-underline-offset: 4px; text-decoration-thickness: 1px; }
   .wet { color: var(--muted); }
   .caret { display: inline-block; width: 2px; height: 1.1em; background: var(--accent); vertical-align: -0.18em; margin-left: 2px; border-radius: 1px; }
-  .entry.live { border-color: var(--accent); }
-  .fade-b { position: absolute; left: 0; right: 0; bottom: 176px; height: 36px; background: linear-gradient(transparent, var(--bg)); }
-  .fade-t { position: absolute; left: 0; right: 0; top: 128px; height: 36px; background: linear-gradient(var(--bg), transparent); }
 
-  .dock { position: absolute; left: 16px; right: 16px; bottom: 28px; display: flex; flex-direction: column; gap: 10px; }
-  .seg { display: grid; grid-template-columns: repeat(4, 1fr); background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 4px; gap: 4px; height: 52px; box-sizing: border-box; }
-  .seg span { display: flex; align-items: center; justify-content: center; border-radius: 14px; font: 700 15px "Unbounded"; color: var(--muted); }
+  .fade-b { position: absolute; left: 0; right: 0; bottom: 96px; height: 30px; background: linear-gradient(transparent, var(--bg)); }
+  .dock { position: absolute; left: 16px; right: 16px; bottom: 26px; height: 62px; display: flex; gap: 10px; }
+  .seg { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line2); border-radius: 18px; padding: 4px; gap: 2px; box-sizing: border-box; }
+  .seg span { display: flex; align-items: center; justify-content: center; border-radius: 14px; font: 700 13.5px "Unbounded"; color: var(--muted); }
   .seg span.on { background: var(--track); color: var(--text); box-shadow: inset 0 0 0 1px var(--accent); }
   .seg.locked span:not(.on) { color: var(--dim); }
-  .btn { height: 72px; border-radius: 24px; background: var(--accent); color: var(--on-accent); display: flex; align-items: center; justify-content: center; gap: 12px; font: 700 20px "Unbounded"; }
-  .btn.rec { background: var(--accent-dark); color: var(--text); border: 1.5px solid var(--accent); justify-content: space-between; padding: 0 22px; box-sizing: border-box; }
-  .btn.rec .dot { width: 12px; height: 12px; border-radius: 6px; background: var(--rec); display: inline-block; margin-right: 10px; }
-  .btn.rec .stop { width: 46px; height: 46px; border-radius: 14px; background: var(--accent); display: flex; align-items: center; justify-content: center; }
-  .navpill { position: absolute; bottom: 8px; left: 50%; width: 108px; margin-left: -54px; height: 4px; border-radius: 2px; background: var(--line); }
-
-  /* календарь */
-  .calp { margin-top: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 22px; padding: 14px 0 12px; }
-  .days { display: grid; grid-template-columns: repeat(7, 34px); column-gap: 10px; row-gap: 6px; justify-content: center; }
-  .days .w { text-align: center; font: 700 11.5px "Manrope"; letter-spacing: 1px; color: var(--muted); padding-bottom: 4px; text-transform: uppercase; }
-  .days .d { height: 34px; border-radius: 11px; display: flex; flex-direction: column; align-items: center; justify-content: center; font: 500 13px "Unbounded"; position: relative; }
-  .days .d.fut { color: var(--dim); }
-  .days .d.has { background: var(--track); }
-  .days .d.has::after { content: ""; width: 4px; height: 4px; border-radius: 2px; background: var(--accent); position: absolute; bottom: 3px; }
-  .days .d.today { background: var(--accent); color: var(--on-accent); font-weight: 700; }
-  .days .d.today::after { background: var(--on-accent); }
-  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
-  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 14px 16px; }
-  .stat .n { font: 700 26px "Unbounded"; margin-top: 6px; }
-  .stat .n small { font: 600 14px "Manrope"; color: var(--muted); margin-left: 4px; }
+  .mic { width: 104px; border-radius: 20px; background: var(--accent); color: var(--on-accent); display: flex; align-items: center; justify-content: center; }
+  .dock.rec .seg { display: flex; align-items: center; gap: 10px; padding: 0 16px; font: 700 18px "Unbounded"; }
+  .dock.rec .dot { width: 11px; height: 11px; border-radius: 6px; background: var(--rec); }
+  .dock.rec .seg small { font: 700 13px "Unbounded"; color: var(--muted); margin-left: auto; }
+  .navpill { position: absolute; bottom: 8px; left: 50%; width: 108px; margin-left: -54px; height: 4px; border-radius: 2px; background: var(--line2); }
 </style>
 </head>
 <body>
@@ -81,44 +72,52 @@
 <script>
 const I = (d, s = 22, w = 1.8) => `<svg width="${s}" height="${s}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
 const SEARCH = I(`<circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/>`);
-const CAL = I(`<rect x="3.5" y="5" width="17" height="15.5" rx="3.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>`);
-const MIC = I(`<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/>`, 26, 2.1);
-const STOP = `<svg width="18" height="18" viewBox="0 0 18 18"><rect x="2" y="2" width="14" height="14" rx="3.5" fill="var(--on-accent)"/></svg>`;
-const BACK = I(`<path d="M14.5 5 8 12l6.5 7"/>`);
-const FWD = I(`<path d="M9.5 5 16 12l-6.5 7"/>`);
+const MIC = I(`<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/>`, 28, 2.1);
+const STOP = `<svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="3" width="16" height="16" rx="4" fill="currentColor"/></svg>`;
+const UP = I(`<path d="M6 15l6-6 6 6"/>`, 20);
 
 const status = (t) => `<div class="status"><span>${t}</span><span>▮▮</span></div>`;
-const hdr = `<div class="top"><div class="titles"><div class="cap">Понедельник</div><div class="big">9 ноября</div></div>
-  <div class="sq">${SEARCH}</div><div class="sq">${CAL}</div></div>`;
-const seg = (locked) => `<div class="seg ${locked ? "locked" : ""}">${["RU","UK","EN","DE"].map(l => `<span class="${l === "RU" ? "on" : ""}">${l}</span>`).join("")}</div>`;
-const dock = (rec) => `<div class="dock">${seg(rec)}${rec
-  ? `<div class="btn rec"><span><span class="dot"></span>1:24</span><span class="stop">${STOP}</span></div>`
-  : `<div class="btn">${MIC}Говорить</div>`}</div><div class="navpill"></div>`;
+const hdr = `<div class="hdr"><div class="t">Дневник</div><div class="sq">${SEARCH}</div></div>`;
+const dock = (rec) => rec
+  ? `<div class="dock rec"><div class="seg"><span class="dot"></span>1:24<small>RU</small></div><div class="mic">${STOP}</div></div><div class="navpill"></div>`
+  : `<div class="dock"><div class="seg">${["RU","UK","EN","DE"].map(l => `<span class="${l === "RU" ? "on" : ""}">${l}</span>`).join("")}</div><div class="mic">${MIC}</div></div><div class="navpill"></div>`;
 
-const E = (t, lang, x, tags = [], live = false) => `<div class="entry ${live ? "live" : ""}"><div class="meta"><span class="t">${t}</span><span class="lang">${lang}</span></div>
-  <div class="x">${x}</div>${tags.length ? `<div class="tags">${tags.map(g => `<span class="chip">${g}</span>`).join("")}</div>` : ""}</div>`;
-const E1 = E("7:42", "RU", "Проснулся раньше будильника. За окном первый снег, всё белое и тихое. Решил не торопиться и выпить кофе у окна.", ["утро"]);
-const E2 = E("9:15", "RU", `Созвон с командой. Обсудили <span class="foreign">roadmap</span> на декабрь, Марина предложила перенести релиз на неделю. Думаю, она права.`, ["работа"]);
-const E3 = E("13:30", "UK", "Зайшов до мами. Ґанок увесь у листі, посиділи там із чаєм. Їжак знову приходив у сад — мама каже, він уже як свій. Є відчуття, що осінь цього року довга.", ["семья"]);
-const E4 = E("18:05", "EN", "Quick run along the river after work. Cold, but the light over the water was beautiful.", ["спорт"]);
-const E5 = E("21:40", "RU", `Вечером долго думал о том, что сказала Марина. Наверное, стоит поговорить с ней завтра утром, <span class="wet">пока не начался весь этот</span><span class="caret"></span>`, [], true);
+const row = (d, wd, meta, pre, today = false, open = false) =>
+  `<div class="day ${today ? "today" : ""}"><div class="num"><b>${d}</b><i>${wd}</i></div>
+   <div class="info"><div class="meta">${meta}</div>${open ? "" : `<div class="pre">${pre}</div>`}</div>${open ? `<div class="chev">${UP}</div>` : ""}</div>`;
 
-const day = (theme, id) => `<div class="phone ${theme}" id="${id}">${status("21:12")}<div class="wrap">${hdr}</div>
-  <div class="list">${E1}${E2}${E3}</div><div class="fade-b"></div>${dock(false)}</div>`;
-const dict = `<div class="phone dark" id="dict">${status("21:41")}<div class="wrap">${hdr}</div>
-  <div class="list end">${E2}${E3}${E4}${E5}</div><div class="fade-t"></div>${dock(true)}</div>`;
-const has = new Set([1, 3, 4, 5, 7, 8]);
-let c = ["пн","вт","ср","чт","пт","сб","вс"].map(w => `<div class="w">${w}</div>`).join("");
-for (let i = 0; i < 6; i++) c += `<div></div>`;
-for (let d = 1; d <= 30; d++) c += `<div class="d ${d > 9 ? "fut" : ""} ${has.has(d) ? "has" : ""} ${d === 9 ? "today" : ""}">${d}</div>`;
-const cal = `<div class="phone dark" id="cal">${status("21:13")}<div class="wrap">
-  <div class="top"><div class="sq">${BACK}</div><div class="titles" style="padding-left:4px"><div class="cap">2026</div><div class="big" style="font-size:26px">Ноябрь</div></div><div class="sq">${FWD}</div></div>
-  <div class="calp"><div class="days">${c}</div></div>
-  <div class="stats"><div class="stat"><div class="cap">Дней с записями</div><div class="n">7<small>из 9</small></div></div>
-  <div class="stat"><div class="cap">Записей</div><div class="n">23</div></div></div>
-  </div><div class="navpill"></div></div>`;
+const days = [
+  ["8", "вс", "2 записи · <span class='acc'>семья</span>", "Весь день дома, разбирал старые фотографии. Нашёл снимки с моря"],
+  ["7", "сб", "1 запись", "Ходили с Олей в новый ресторан у парка, вкусно, но очень шумно"],
+  ["5", "чт", "3 записи · <span class='acc'>работа</span>", "Тяжёлый день. Три созвона подряд, к вечеру голова гудела"],
+  ["4", "ср", "1 запись · <span class='acc'>спорт</span>", "Первая пробежка после болезни, всего 3 км, но приятно"],
+  ["3", "вт", "2 записи", "Купил билеты на декабрь. Летим во Львов на четыре дня"],
+  ["1", "вс", "1 запись", "Ноябрь. Хочу в этом месяце каждый день писать хотя бы пару слов"],
+];
+const oct = [
+  ["31", "сб", "2 записи · <span class='acc'>семья</span>", "Хэллоуин у соседей, дети в костюмах, очень смешно"],
+  ["30", "пт", "1 запись", "Закрыли квартал. Можно выдохнуть и наконец поспать"],
+  ["28", "ср", "1 запись", "Gestern war ein langer Tag, aber endlich ist alles fertig"],
+];
+const today = row("9", "пн", "<span class='acc'>Сегодня</span> · 4 записи", "Проснулся раньше будильника. За окном первый снег, всё белое и тихое");
+const rest = days.map(d => row(...d)).join("") + `<div class="month">Октябрь 2026</div>` + oct.map(d => row(...d)).join("");
 
-document.getElementById("out").outerHTML = day("dark", "day") + dict + cal + day("light", "light");
+const entries = (live) => `
+  <div class="e"><span class="tm">7:42</span>Проснулся раньше будильника. За окном первый снег, всё белое и тихое. Решил не торопиться и выпить кофе у окна.<span class="tag">#утро</span></div>
+  <div class="e"><span class="tm">9:15</span>Созвон с командой. Обсудили <span class="foreign">roadmap</span> на декабрь, Марина предложила перенести релиз на неделю. Думаю, она права.<span class="tag">#работа</span></div>
+  <div class="e"><span class="tm">13:30</span>Зайшов до мами. Ґанок увесь у листі, посиділи там із чаєм. Їжак знову приходив у сад — мама каже, він уже як свій.<span class="tag">#семья</span></div>
+  <div class="e"><span class="tm">18:05</span>Quick run along the river after work. Cold, but the light over the water was beautiful.<span class="tag">#спорт</span></div>
+  ${live ? `<div class="e"><span class="tm">21:40</span>Вечером долго думал о том, что сказала Марина. Наверное, стоит поговорить с ней завтра утром, <span class="wet">пока не начался весь этот</span><span class="caret"></span></div>` : ""}`;
+const opened = (live) => `<div class="opened">${row("9", "пн", `<span class='acc'>Сегодня</span> · ${live ? 5 : 4} записи`, "", true, true)}<div class="body">${entries(live)}</div></div>`;
+
+const feed = (theme, id) => `<div class="phone ${theme}" id="${id}">${status("21:12")}${hdr}
+  <div class="feed"><div class="month">Ноябрь 2026</div>${today}${rest}</div><div class="fade-b"></div>${dock(false)}</div>`;
+const open = `<div class="phone dark" id="open">${status("21:12")}${hdr}
+  <div class="feed"><div class="month">Ноябрь 2026</div>${opened(false)}${rest}</div><div class="fade-b"></div>${dock(false)}</div>`;
+const dict = `<div class="phone dark" id="dict">${status("21:41")}${hdr}
+  <div class="feed"><div class="month">Ноябрь 2026</div>${opened(true)}${rest}</div><div class="fade-b"></div>${dock(true)}</div>`;
+
+document.getElementById("out").outerHTML = feed("dark", "feed") + open + dict + feed("light", "light");
 </script>
 </body>
 </html>
