@@ -10,14 +10,14 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/pangolin@5.3.0/400.css">
 <style>
   .dark {
-    --bg: #0F1115; --open: #161920; --track: #22262E; --line: #22262D; --line2: #2C313A;
-    --text: #F4F1EA; --soft: #C9CDD3; --muted: #9AA0AA; --dim: #5C626C;
-    --accent: #7CB7FF; --on-accent: #0A1424; --accent-dark: #142235; --rec: #FF5A4E;
+    --bg: #121110; --plate: #1C1A17; --open: #24211D; --track: #2C2925; --line2: #34302B;
+    --text: #F4F1EA; --soft: #C9C4BC; --muted: #9B958C; --dim: #6A655E;
+    --accent: #F2A97E; --on-accent: #2A160A; --accent-dark: #3A2619; --rec: #FF5A4E;
   }
   .light {
-    --bg: #F6F7F9; --open: #FFFFFF; --track: #E6E9EE; --line: #E3E6EB; --line2: #D5DAE1;
-    --text: #15181D; --soft: #3A4049; --muted: #5E6570; --dim: #A3A9B2;
-    --accent: #1F5FD1; --on-accent: #FFFFFF; --accent-dark: #E3ECFB; --rec: #D93A2F;
+    --bg: #F6F3EE; --plate: #FFFFFF; --open: #FFFFFF; --track: #EEE9E2; --line2: #E2DCD3;
+    --text: #1C1916; --soft: #4A453F; --muted: #6E675F; --dim: #B3ACA2;
+    --accent: #A94F28; --on-accent: #FFFFFF; --accent-dark: #F5E6DC; --rec: #D93A2F;
   }
   body { margin: 0; background: #555; display: flex; gap: 24px; padding: 24px; flex-wrap: wrap; }
   .phone { width: 384px; height: 854px; position: relative; overflow: hidden; background: var(--bg); color: var(--text); font-family: "Manrope", sans-serif; }
@@ -25,14 +25,13 @@
 
   .hdr { display: flex; align-items: center; padding: 8px 16px 10px 20px; }
   .hdr .t { flex: 1; font: 700 26px "Unbounded"; letter-spacing: -.3px; }
-  .sq { width: 46px; height: 46px; border-radius: 14px; border: 1px solid var(--line2); display: flex; align-items: center; justify-content: center; color: var(--text); box-sizing: border-box; }
+  .sq { width: 46px; height: 46px; border-radius: 14px; background: var(--plate); display: flex; align-items: center; justify-content: center; color: var(--text); box-sizing: border-box; }
 
   .feed { position: absolute; top: 94px; left: 0; right: 0; bottom: 96px; overflow: hidden; }
   .feed.end { display: flex; flex-direction: column; justify-content: flex-end; }
-  .month { font: 700 12px "Manrope"; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); padding: 16px 20px 6px; }
+  .month { font: 700 12px "Manrope"; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); padding: 16px 22px 8px; }
 
-  .day { display: grid; grid-template-columns: 1fr; padding: 7px 20px 8px; border-top: 1px solid var(--line); align-items: center; }
-  .month + .day { border-top: none; }
+  .day { display: grid; grid-template-columns: 1fr; padding: 8px 14px 9px; margin: 0 10px 4px; background: var(--plate); border-radius: 14px; align-items: center; }
   .num { text-align: center; }
   .num b { display: block; font: 700 21px "Unbounded"; line-height: 1.05; }
   .num i { display: block; font: normal 700 11px "Manrope"; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
@@ -41,13 +40,13 @@
   .info .meta { font: 600 12px "Manrope"; color: var(--muted); line-height: 1.35; white-space: nowrap; }
   .info .meta .dt { font-variant-numeric: tabular-nums; color: var(--soft); }
   .info .meta .acc { color: var(--accent); }
-  .info .pre { font-family: "Pangolin"; font-size: 16px; line-height: 1.22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--soft); }
+  .info .pre { font-family: "Pangolin"; font-size: 17px; line-height: 1.25; letter-spacing: -0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--soft); }
 
   /* раскрытый день */
-  .opened { background: var(--open); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .opened .day { border-top: none; grid-template-columns: 1fr 24px; padding: 10px 20px 6px; }
+  .opened { background: var(--open); margin: 0 10px 4px; border-radius: 16px; }
+  .opened .day { grid-template-columns: 1fr 24px; padding: 11px 14px 6px; margin: 0; background: none; }
   .opened .chev { color: var(--muted); }
-  .body { padding: 2px 20px 14px 20px; }
+  .body { padding: 2px 14px 14px 14px; }
   .e { font-family: "Pangolin"; font-size: 17.5px; line-height: 1.32; margin-bottom: 10px; }
   .e .tm { font: 700 12.5px "Unbounded"; color: var(--accent); margin-right: 6px; }
   .e .tag { font: 700 12px "Manrope"; color: var(--accent); white-space: nowrap; margin-left: 4px; }
@@ -57,7 +56,7 @@
 
   .fade-b { position: absolute; left: 0; right: 0; bottom: 96px; height: 30px; background: linear-gradient(transparent, var(--bg)); }
   .dock { position: absolute; left: 16px; right: 16px; bottom: 26px; height: 62px; display: flex; gap: 10px; }
-  .seg { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line2); border-radius: 18px; padding: 4px; gap: 2px; box-sizing: border-box; }
+  .seg { flex: 1; display: grid; grid-template-columns: repeat(4, 1fr); background: var(--plate); border-radius: 18px; padding: 4px; gap: 2px; box-sizing: border-box; }
   .seg span { display: flex; align-items: center; justify-content: center; border-radius: 14px; font: 700 13.5px "Unbounded"; color: var(--muted); }
   .seg span.on { background: var(--track); color: var(--text); box-shadow: inset 0 0 0 1px var(--accent); }
   .seg.locked span:not(.on) { color: var(--dim); }
