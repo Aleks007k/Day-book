@@ -2,6 +2,7 @@ package com.daybook.app.speech
 
 import android.content.Context
 import android.content.Intent
+import android.media.AudioFormat
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -23,9 +24,11 @@ import androidx.compose.runtime.setValue
  * а отдаёт текст кусками. Как задать длину сеанса, документация описывает
  * неоднозначно, поэтому проверяем два способа:
  *  A — «минимальная длина сеанса» числом int;
- *  B — то же самое числом long (старые службы Google читают long).
+ *  B — то же самое числом long (старые службы Google читают long);
+ *  C — «свой микрофон»: приложение само пишет звук и передаёт его
+ *      распознавателю непрерывным потоком (см. MicPipe).
  */
-enum class LongMode(val label: String) { OFF("нет"), A("A"), B("B") }
+enum class LongMode(val label: String) { OFF("нет"), A("A"), B("B"), C("C") }
 
 data class SessionOptions(
     val engine: Engine,
@@ -133,6 +136,7 @@ class SpeechSession(
 
     private val handler = Handler(Looper.getMainLooper())
     private var recognizer: SpeechRecognizer? = null
+    private var mic: MicPipe? = null
     private var listening = false
     private var stoppedAt = 0L
     private var consecutiveErrors = 0
@@ -162,9 +166,14 @@ class SpeechSession(
         stopReason = reason
         status = "завершаю…"
         handler.removeCallbacksAndMessages(null)
-        try {
-            recognizer?.stopListening()
-        } catch (_: Exception) {
+        if (options.longMode == LongMode.C) {
+            // Закрываем свой микрофон: распознаватель увидит конец звука и допишет последний кусок.
+            mic?.close()
+        } else {
+            try {
+                recognizer?.stopListening()
+            } catch (_: Exception) {
+            }
         }
         // Даём распознавателю секунду дописать последний кусок, потом закрываем.
         handler.postDelayed({ finish() }, 1500)
@@ -187,6 +196,16 @@ class SpeechSession(
     private fun listen(first: Boolean) {
         if (!active) return
         if (!first) restarts++
+        if (options.longMode == LongMode.C) {
+            mic?.close()
+            val m = MicPipe { lvl -> handler.post { level = lvl } }
+            val err = m.open()
+            if (err != null) {
+                fail(err)
+                return
+            }
+            mic = m
+        }
         try {
             recognizer?.startListening(buildIntent())
             listening = true
@@ -218,6 +237,13 @@ class SpeechSession(
                     RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS,
                 )
                 putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_MINIMUM_LENGTH_MILLIS, hour.toLong())
+            }
+            LongMode.C -> {
+                putExtra(RecognizerIntent.EXTRA_SEGMENTED_SESSION, RecognizerIntent.EXTRA_AUDIO_SOURCE)
+                putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE, mic?.readSide)
+                putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_CHANNEL_COUNT, 1)
+                putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_ENCODING, AudioFormat.ENCODING_PCM_16BIT)
+                putExtra(RecognizerIntent.EXTRA_AUDIO_SOURCE_SAMPLING_RATE, MicPipe.SAMPLE_RATE)
             }
         }
         if (options.punctuation) {
@@ -382,6 +408,8 @@ class SpeechSession(
     private fun finish() {
         if (finished) return
         finished = true
+        mic?.close()
+        mic = null
         recognizer?.destroy()
         recognizer = null
         // Недописанный хвост тоже сохраняем, чтобы он попал в отчёт.
