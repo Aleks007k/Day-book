@@ -99,6 +99,9 @@ object Engines {
     fun shortName(s: ServiceEntry): String {
         val p = s.component.packageName.lowercase(Locale.ROOT)
         return when {
+            // У Samsung две службы Google: «Android System Intelligence» и
+            // «Распознавание и синтез речи» — подписываем их по-разному.
+            p == "com.google.android.as" -> "Google ASI"
             p.contains("google") -> "Google"
             p.contains("samsung") || p.contains("sec.") -> "Samsung"
             else -> s.label
