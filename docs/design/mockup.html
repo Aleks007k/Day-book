@@ -31,22 +31,23 @@
   .feed.end { display: flex; flex-direction: column; justify-content: flex-end; }
   .month { font: 700 12px "Manrope"; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); padding: 16px 20px 6px; }
 
-  .day { display: grid; grid-template-columns: 42px 1fr; column-gap: 14px; padding: 10px 20px 11px; border-top: 1px solid var(--line); align-items: center; }
+  .day { display: grid; grid-template-columns: 1fr; padding: 7px 20px 8px; border-top: 1px solid var(--line); align-items: center; }
   .month + .day { border-top: none; }
   .num { text-align: center; }
   .num b { display: block; font: 700 21px "Unbounded"; line-height: 1.05; }
   .num i { display: block; font: normal 700 11px "Manrope"; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
   .day.today .num b { color: var(--accent); }
   .info { min-width: 0; }
-  .info .meta { font: 600 12.5px "Manrope"; color: var(--muted); display: flex; gap: 6px; }
+  .info .meta { font: 600 12px "Manrope"; color: var(--muted); line-height: 1.35; white-space: nowrap; }
+  .info .meta .dt { font-variant-numeric: tabular-nums; color: var(--soft); }
   .info .meta .acc { color: var(--accent); }
-  .info .pre { font-family: "Pangolin"; font-size: 17px; line-height: 1.3; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--soft); }
+  .info .pre { font-family: "Pangolin"; font-size: 16px; line-height: 1.22; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--soft); }
 
   /* раскрытый день */
   .opened { background: var(--open); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
-  .opened .day { border-top: none; grid-template-columns: 42px 1fr 24px; }
+  .opened .day { border-top: none; grid-template-columns: 1fr 24px; padding: 10px 20px 6px; }
   .opened .chev { color: var(--muted); }
-  .body { padding: 2px 20px 14px 76px; }
+  .body { padding: 2px 20px 14px 20px; }
   .e { font-family: "Pangolin"; font-size: 17.5px; line-height: 1.32; margin-bottom: 10px; }
   .e .tm { font: 700 12.5px "Unbounded"; color: var(--accent); margin-right: 6px; }
   .e .tag { font: 700 12px "Manrope"; color: var(--accent); white-space: nowrap; margin-left: 4px; }
@@ -82,24 +83,23 @@ const dock = (rec) => rec
   ? `<div class="dock rec"><div class="seg"><span class="dot"></span>1:24<small>RU</small></div><div class="mic">${STOP}</div></div><div class="navpill"></div>`
   : `<div class="dock"><div class="seg">${["RU","UK","EN","DE"].map(l => `<span class="${l === "RU" ? "on" : ""}">${l}</span>`).join("")}</div><div class="mic">${MIC}</div></div><div class="navpill"></div>`;
 
-const row = (d, wd, meta, pre, today = false, open = false) =>
-  `<div class="day ${today ? "today" : ""}"><div class="num"><b>${d}</b><i>${wd}</i></div>
-   <div class="info"><div class="meta">${meta}</div>${open ? "" : `<div class="pre">${pre}</div>`}</div>${open ? `<div class="chev">${UP}</div>` : ""}</div>`;
+const row = (date, meta, pre, today = false, open = false) =>
+  `<div class="day ${today ? "today" : ""}"><div class="info"><div class="meta"><span class="dt">${date}</span>${today ? ` · <span class="acc">сегодня</span>` : ""} · ${meta}</div>${open ? "" : `<div class="pre">${pre}</div>`}</div>${open ? `<div class="chev">${UP}</div>` : ""}</div>`;
 
 const days = [
-  ["8", "вс", "2 записи · <span class='acc'>семья</span>", "Весь день дома, разбирал старые фотографии. Нашёл снимки с моря"],
-  ["7", "сб", "1 запись", "Ходили с Олей в новый ресторан у парка, вкусно, но очень шумно"],
-  ["5", "чт", "3 записи · <span class='acc'>работа</span>", "Тяжёлый день. Три созвона подряд, к вечеру голова гудела"],
-  ["4", "ср", "1 запись · <span class='acc'>спорт</span>", "Первая пробежка после болезни, всего 3 км, но приятно"],
-  ["3", "вт", "2 записи", "Купил билеты на декабрь. Летим во Львов на четыре дня"],
-  ["1", "вс", "1 запись", "Ноябрь. Хочу в этом месяце каждый день писать хотя бы пару слов"],
+  ["08.11.2026", "2 записи · <span class='acc'>семья</span>", "Весь день дома, разбирал старые фотографии. Нашёл снимки с моря"],
+  ["07.11.2026", "1 запись", "Ходили с Олей в новый ресторан у парка, вкусно, но очень шумно"],
+  ["05.11.2026", "3 записи · <span class='acc'>работа</span>", "Тяжёлый день. Три созвона подряд, к вечеру голова гудела"],
+  ["04.11.2026", "1 запись · <span class='acc'>спорт</span>", "Первая пробежка после болезни, всего 3 км, но приятно"],
+  ["03.11.2026", "2 записи", "Купил билеты на декабрь. Летим во Львов на четыре дня"],
+  ["01.11.2026", "1 запись", "Ноябрь. Хочу в этом месяце каждый день писать хотя бы пару слов"],
 ];
 const oct = [
-  ["31", "сб", "2 записи · <span class='acc'>семья</span>", "Хэллоуин у соседей, дети в костюмах, очень смешно"],
-  ["30", "пт", "1 запись", "Закрыли квартал. Можно выдохнуть и наконец поспать"],
-  ["28", "ср", "1 запись", "Gestern war ein langer Tag, aber endlich ist alles fertig"],
+  ["31.10.2026", "2 записи · <span class='acc'>семья</span>", "Хэллоуин у соседей, дети в костюмах, очень смешно"],
+  ["30.10.2026", "1 запись", "Закрыли квартал. Можно выдохнуть и наконец поспать"],
+  ["28.10.2026", "1 запись", "Gestern war ein langer Tag, aber endlich ist alles fertig"],
 ];
-const today = row("9", "пн", "<span class='acc'>Сегодня</span> · 4 записи", "Проснулся раньше будильника. За окном первый снег, всё белое и тихое");
+const today = row("09.11.2026", "4 записи · <span class='acc'>утро</span>", "Проснулся раньше будильника. За окном первый снег, всё белое и тихое", true);
 const rest = days.map(d => row(...d)).join("") + `<div class="month">Октябрь 2026</div>` + oct.map(d => row(...d)).join("");
 
 const entries = (live) => `
@@ -108,7 +108,7 @@ const entries = (live) => `
   <div class="e"><span class="tm">13:30</span>Зайшов до мами. Ґанок увесь у листі, посиділи там із чаєм. Їжак знову приходив у сад — мама каже, він уже як свій.<span class="tag">#семья</span></div>
   <div class="e"><span class="tm">18:05</span>Quick run along the river after work. Cold, but the light over the water was beautiful.<span class="tag">#спорт</span></div>
   ${live ? `<div class="e"><span class="tm">21:40</span>Вечером долго думал о том, что сказала Марина. Наверное, стоит поговорить с ней завтра утром, <span class="wet">пока не начался весь этот</span><span class="caret"></span></div>` : ""}`;
-const opened = (live) => `<div class="opened">${row("9", "пн", `<span class='acc'>Сегодня</span> · ${live ? 5 : 4} записи`, "", true, true)}<div class="body">${entries(live)}</div></div>`;
+const opened = (live) => `<div class="opened">${row("09.11.2026", `${live ? "5 записей" : "4 записи"} · <span class='acc'>утро</span>`, "", true, true)}<div class="body">${entries(live)}</div></div>`;
 
 const feed = (theme, id) => `<div class="phone ${theme}" id="${id}">${status("21:12")}${hdr}
   <div class="feed"><div class="month">Ноябрь 2026</div>${today}${rest}</div><div class="fade-b"></div>${dock(false)}</div>`;
