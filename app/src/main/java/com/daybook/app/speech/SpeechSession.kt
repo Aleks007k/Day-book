@@ -36,6 +36,8 @@ data class SessionOptions(
     val longMode: LongMode,
     val punctuation: Boolean,
     val wordConfidence: Boolean,
+    /** Android 14+: распознаватель сам переключается на язык, на котором заговорили. */
+    val languageSwitch: Boolean = false,
 )
 
 /** Итог одной проверки — строка в отчёте. */
@@ -54,6 +56,8 @@ data class SessionReport(
     val unstableSeen: Boolean,
     val confidence: Map<Int, Int>,
     val unsureWords: List<String>,
+    val detectedLanguages: Map<String, Int>,
+    val switchResults: Map<String, Int>,
     val text: String,
 ) {
     fun toText(index: Int): String = buildString {
@@ -61,7 +65,8 @@ data class SessionReport(
         appendLine("Проверка $index: ${o.engine.title}, ${o.lang.button}")
         appendLine(
             "  настройки: длинный сеанс ${o.longMode.label}, " +
-                "пунктуация ${yes(o.punctuation)}, уверенность слов ${yes(o.wordConfidence)}",
+                "пунктуация ${yes(o.punctuation)}, уверенность слов ${yes(o.wordConfidence)}, " +
+                "смена языка ${yes(o.languageSwitch)}",
         )
         appendLine("  длительность ${durationSec} с, кусков текста $segments, перезапусков $restarts")
         if (restarts > 0) appendLine("  разрыв при перезапуске: макс $maxGapMs мс, в среднем $avgGapMs мс")
@@ -85,6 +90,17 @@ data class SessionReport(
                 if (unsureWords.isNotEmpty()) {
                     appendLine("  неуверенные слова: " + unsureWords.take(20).joinToString(", "))
                 }
+            }
+        }
+        if (o.languageSwitch) {
+            if (detectedLanguages.isEmpty() && switchResults.isEmpty()) {
+                appendLine("  смена языка: данных о языке не пришло")
+            } else {
+                appendLine(
+                    "  смена языка: услышан " + detectedLanguages.entries.joinToString { "${it.key} ×${it.value}" } +
+                        if (switchResults.isEmpty()) "" else "; переключения: " +
+                            switchResults.entries.joinToString { "${it.key} ×${it.value}" },
+                )
             }
         }
         appendLine("  текст: ${text.take(400)}${if (text.length > 400) "…" else ""}")
@@ -151,6 +167,8 @@ class SpeechSession(
     private var unstableSeen = false
     private val confidence = mutableMapOf<Int, Int>()
     private val unsureWords = mutableListOf<String>()
+    private val detectedLanguages = linkedMapOf<String, Int>()
+    private val switchResults = linkedMapOf<String, Int>()
 
     fun start() {
         startedAt = SystemClock.elapsedRealtime()
@@ -253,6 +271,13 @@ class SpeechSession(
         } else {
             putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
         }
+        if (options.languageSwitch && Build.VERSION.SDK_INT >= 34) {
+            val langs = arrayListOf("ru-RU", "uk-UA", "en-US", "de-DE")
+            putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_DETECTION, true)
+            putStringArrayListExtra(RecognizerIntent.EXTRA_LANGUAGE_DETECTION_ALLOWED_LANGUAGES, langs)
+            putExtra(RecognizerIntent.EXTRA_ENABLE_LANGUAGE_SWITCH, RecognizerIntent.LANGUAGE_SWITCH_QUICK_RESPONSE)
+            putStringArrayListExtra(RecognizerIntent.EXTRA_LANGUAGE_SWITCH_ALLOWED_LANGUAGES, langs)
+        }
         if (options.wordConfidence && Build.VERSION.SDK_INT >= 34) {
             putExtra(RecognizerIntent.EXTRA_REQUEST_WORD_CONFIDENCE, true)
             putExtra(RecognizerIntent.EXTRA_REQUEST_WORD_TIMING, true)
@@ -311,6 +336,22 @@ class SpeechSession(
 
         override fun onEndOfSegmentedSession() {
             endOfRound()
+        }
+
+        // Android 14+: какой язык услышал распознаватель и переключился ли он.
+        override fun onLanguageDetection(results: Bundle) {
+            val lang = results.getString(SpeechRecognizer.DETECTED_LANGUAGE)
+            if (!lang.isNullOrBlank()) detectedLanguages[lang] = (detectedLanguages[lang] ?: 0) + 1
+            if (results.containsKey(SpeechRecognizer.LANGUAGE_SWITCH_RESULT)) {
+                val name = when (results.getInt(SpeechRecognizer.LANGUAGE_SWITCH_RESULT)) {
+                    SpeechRecognizer.LANGUAGE_SWITCH_RESULT_SUCCEEDED -> "удачно"
+                    SpeechRecognizer.LANGUAGE_SWITCH_RESULT_FAILED -> "не вышло"
+                    SpeechRecognizer.LANGUAGE_SWITCH_RESULT_SKIPPED_NO_MODEL -> "нет пакета языка"
+                    SpeechRecognizer.LANGUAGE_SWITCH_RESULT_NOT_ATTEMPTED -> "не пробовал"
+                    else -> "другое"
+                }
+                switchResults[name] = (switchResults[name] ?: 0) + 1
+            }
         }
     }
 
@@ -436,6 +477,8 @@ class SpeechSession(
                 unstableSeen = unstableSeen,
                 confidence = confidence.toMap(),
                 unsureWords = unsureWords.toList(),
+                detectedLanguages = detectedLanguages.toMap(),
+                switchResults = switchResults.toMap(),
                 text = finalText,
             ),
         )

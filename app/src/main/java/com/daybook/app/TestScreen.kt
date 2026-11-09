@@ -161,6 +161,9 @@ fun TestScreen(c: TestController, onStart: () -> Unit) {
                 Chip("уверенность слов", c.wordConfidence, enabled = !running) {
                     c.wordConfidence = !c.wordConfidence; c.saveChoice()
                 }
+                Chip("смена языка", c.languageSwitch, enabled = !running) {
+                    c.languageSwitch = !c.languageSwitch; c.saveChoice()
+                }
             }
         }
 

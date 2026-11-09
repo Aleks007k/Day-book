@@ -46,6 +46,7 @@ class TestController(private val context: Context) {
     )
     var punctuation by mutableStateOf(prefs.getBoolean("punct", true))
     var wordConfidence by mutableStateOf(prefs.getBoolean("conf", true))
+    var languageSwitch by mutableStateOf(prefs.getBoolean("switch", false))
 
     var session by mutableStateOf<SpeechSession?>(null)
         private set
@@ -63,6 +64,7 @@ class TestController(private val context: Context) {
             .putString("long", longMode.name)
             .putBoolean("punct", punctuation)
             .putBoolean("conf", wordConfidence)
+            .putBoolean("switch", languageSwitch)
             .apply()
     }
 
@@ -93,7 +95,7 @@ class TestController(private val context: Context) {
         notice = ""
         val s = SpeechSession(
             context,
-            SessionOptions(e, lang, longMode, punctuation, wordConfidence),
+            SessionOptions(e, lang, longMode, punctuation, wordConfidence, languageSwitch),
         ) { report ->
             val entry = report.toText(log.size + 1)
             log.add(entry)
