@@ -1,0 +1,140 @@
+name: Build APK
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Тег версии для публикации в Releases (например, v0.2.0)"
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          # Пустой список: не ставим устаревший пакет "tools" (его больше нет
+          # и он валит шаг). Нужные пакеты ставим следующим шагом.
+          packages: ""
+
+      - name: Install SDK packages
+        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Make gradlew executable
+        run: chmod +x gradlew
+
+      - name: Run unit tests
+        run: ./gradlew test --stacktrace
+
+      - name: Check signing setup (releases only)
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          if [ ! -f signing/release.p12 ]; then
+            echo "::error::Нет постоянного ключа подписи (signing/release.p12) — релиз не может быть выпущен."
+            exit 1
+          fi
+          if [ -z "$SIGNING_PASSWORD" ]; then
+            echo "::error::Не задан секрет SIGNING_PASSWORD — релиз не может быть выпущен."
+            exit 1
+          fi
+
+      - name: Build release APK
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: ./gradlew assembleRelease --stacktrace
+
+      - name: Rename APK
+        run: |
+          mkdir -p dist
+          cp app/build/outputs/apk/release/app-release.apk dist/DayBook.apk
+
+      - name: Check permissions (no network)
+        run: |
+          # Приложение никогда не должно получать доступ к сети — проверяем
+          # готовый APK (вместе со всеми библиотеками), а не только наш манифест.
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          AAPT2=$(ls "$SDK"/build-tools/*/aapt2 2>/dev/null | sort -V | tail -n 1)
+          if [ -z "$AAPT2" ]; then
+            echo "::error::Не найден aapt2 в Android SDK — не могу проверить разрешения."
+            exit 1
+          fi
+          "$AAPT2" dump permissions dist/DayBook.apk | tee permissions.txt
+          if grep -Eq "android.permission.(INTERNET|ACCESS_NETWORK_STATE|ACCESS_WIFI_STATE)" permissions.txt; then
+            echo "::error::В приложении появилось сетевое разрешение — сборка остановлена."
+            exit 1
+          fi
+          echo "Сетевых разрешений нет."
+
+      - name: Verify release signature (releases only)
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        env:
+          SIGNING_PASSWORD: ${{ secrets.SIGNING_PASSWORD }}
+        run: |
+          # Сравниваем отпечаток сертификата в APK с отпечатком постоянного ключа.
+          # Если APK подписан чем-то другим — релиз не выпускается.
+          SDK="${ANDROID_HOME:-$ANDROID_SDK_ROOT}"
+          APKSIGNER=$(ls "$SDK"/build-tools/*/apksigner 2>/dev/null | sort -V | tail -n 1)
+          if [ -z "$APKSIGNER" ]; then
+            echo "::error::Не найден apksigner в Android SDK — не могу проверить подпись."
+            exit 1
+          fi
+          APK_SHA=$("$APKSIGNER" verify --print-certs dist/DayBook.apk \
+            | grep -m1 "certificate SHA-256 digest" | sed 's/.*digest: //' \
+            | tr -d ' :' | tr 'A-F' 'a-f')
+          KEY_SHA=$(keytool -list -v -keystore signing/release.p12 -storetype PKCS12 \
+            -storepass:env SIGNING_PASSWORD -alias daybook \
+            | grep -m1 "SHA256:" | sed 's/.*SHA256: //' \
+            | tr -d ' :' | tr 'A-F' 'a-f')
+          echo "Отпечаток в APK:   $APK_SHA"
+          echo "Отпечаток ключа:   $KEY_SHA"
+          if [ -z "$APK_SHA" ] || [ "$APK_SHA" != "$KEY_SHA" ]; then
+            echo "::error::APK подписан не постоянным ключом — релиз отменён."
+            exit 1
+          fi
+          echo "Подпись APK совпадает с постоянным ключом."
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: DayBook-apk
+          path: dist/DayBook.apk
+          if-no-files-found: error
+
+      - name: Publish release (version tag or manual run)
+        if: startsWith(github.ref, 'refs/tags/v') || github.event_name == 'workflow_dispatch'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/DayBook.apk
+          # По тегу — имя тега; по ручному запуску — тег из поля ввода.
+          # Если тега ещё нет, GitHub создаёт его сам из текущего коммита.
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
+          name: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || github.ref_name }}
+          target_commitish: ${{ github.sha }}
+          body: |
+            Установочный файл дневника (подписан постоянным ключом).
+            Скачайте **DayBook.apk** ниже и установите на телефон
+            (инструкция — в README репозитория).
