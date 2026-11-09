@@ -10,13 +10,13 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/pangolin@5.3.0/400.css">
 <style>
   .dark {
-    --bg: #121110; --plate: #1C1A17; --open: #24211D; --track: #2C2925; --line2: #34302B;
-    --text: #F4F1EA; --soft: #C9C4BC; --muted: #9B958C; --dim: #6A655E;
-    --accent: #F2A97E; --on-accent: #2A160A; --accent-dark: #3A2619; --rec: #FF5A4E;
+    --bg: #0D0C0B; --plate: #221F1B; --open: #2B2722; --track: #36322C; --line2: #3A352F;
+    --text: #F7F4EE; --soft: #E6E1D9; --muted: #ADA79D; --dim: #6E6962;
+    --accent: #F5AE82; --on-accent: #2A160A; --accent-dark: #3A2619; --rec: #FF5A4E;
   }
   .light {
-    --bg: #F6F3EE; --plate: #FFFFFF; --open: #FFFFFF; --track: #EEE9E2; --line2: #E2DCD3;
-    --text: #1C1916; --soft: #4A453F; --muted: #6E675F; --dim: #B3ACA2;
+    --bg: #E9E4DC; --plate: #FFFFFF; --open: #FFFFFF; --track: #EEE9E2; --line2: #D8D1C6;
+    --text: #15130F; --soft: #26221D; --muted: #625B52; --dim: #B3ACA2;
     --accent: #A94F28; --on-accent: #FFFFFF; --accent-dark: #F5E6DC; --rec: #D93A2F;
   }
   body { margin: 0; background: #555; display: flex; gap: 24px; padding: 24px; flex-wrap: wrap; }
@@ -29,9 +29,9 @@
 
   .feed { position: absolute; top: 94px; left: 0; right: 0; bottom: 96px; overflow: hidden; }
   .feed.end { display: flex; flex-direction: column; justify-content: flex-end; }
-  .month { font: 700 12px "Manrope"; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); padding: 16px 22px 8px; }
+  .month { font: 700 12px "Manrope"; letter-spacing: 1.3px; text-transform: uppercase; color: var(--muted); padding: 16px 18px 8px; }
 
-  .day { display: grid; grid-template-columns: 1fr; padding: 8px 14px 9px; margin: 0 10px 4px; background: var(--plate); border-radius: 14px; align-items: center; }
+  .day { display: grid; grid-template-columns: 1fr; padding: 6px 10px 7px; margin: 0 8px 4px; background: var(--plate); border-radius: 14px; align-items: center; }
   .num { text-align: center; }
   .num b { display: block; font: 700 21px "Unbounded"; line-height: 1.05; }
   .num i { display: block; font: normal 700 11px "Manrope"; letter-spacing: 1px; color: var(--muted); text-transform: uppercase; margin-top: 2px; }
@@ -43,10 +43,10 @@
   .info .pre { font-family: "Pangolin"; font-size: 17px; line-height: 1.25; letter-spacing: -0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--soft); }
 
   /* раскрытый день */
-  .opened { background: var(--open); margin: 0 10px 4px; border-radius: 16px; }
-  .opened .day { grid-template-columns: 1fr 24px; padding: 11px 14px 6px; margin: 0; background: none; }
+  .opened { background: var(--open); margin: 0 8px 4px; border-radius: 16px; }
+  .opened .day { grid-template-columns: 1fr 24px; padding: 8px 10px 4px; margin: 0; background: none; }
   .opened .chev { color: var(--muted); }
-  .body { padding: 2px 14px 14px 14px; }
+  .body { padding: 2px 10px 10px 10px; }
   .e { font-family: "Pangolin"; font-size: 17.5px; line-height: 1.32; margin-bottom: 10px; }
   .e .tm { font: 700 12.5px "Unbounded"; color: var(--accent); margin-right: 6px; }
   .e .tag { font: 700 12px "Manrope"; color: var(--accent); white-space: nowrap; margin-left: 4px; }
@@ -77,7 +77,7 @@ const STOP = `<svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="3" 
 const UP = I(`<path d="M6 15l6-6 6 6"/>`, 20);
 
 const status = (t) => `<div class="status"><span>${t}</span><span>▮▮</span></div>`;
-const hdr = `<div class="hdr"><div class="t">Дневник</div><div class="sq">${SEARCH}</div></div>`;
+const hdr = `<div class="hdr"><div class="t">Day book</div><div class="sq">${SEARCH}</div></div>`;
 const dock = (rec) => rec
   ? `<div class="dock rec"><div class="seg"><span class="dot"></span>1:24<small>RU</small></div><div class="mic">${STOP}</div></div><div class="navpill"></div>`
   : `<div class="dock"><div class="seg">${["RU","UK","EN","DE"].map(l => `<span class="${l === "RU" ? "on" : ""}">${l}</span>`).join("")}</div><div class="mic">${MIC}</div></div><div class="navpill"></div>`;
