@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Дневник — макеты</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/literata@5.3.0/400.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/literata@5.3.0/500.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/literata@5.3.0/600.css">
+<style>
+  .light {
+    --paper: #F6F8FB;   /* холодный белый */
+    --ink: #1C3A8A;     /* синие чернила, 9.8:1 */
+    --ink-soft: #3456A6;/* иностранные слова, теги, 6.5:1 */
+    --ink-wet: #4D6BB5; /* ещё не подтверждено, 4.8:1 */
+    --ink-faint: #C9D3E8; /* только для линий, не для текста */
+  }
+  .dark {
+    --paper: #0F1B33;   /* глубокий синий */
+    --ink: #BCCBEA;     /* 10.5:1 */
+    --ink-soft: #8AA2D6;/* 6.7:1 */
+    --ink-wet: #6E86BC; /* 4.7:1 */
+    --ink-faint: #2A3A5C;
+  }
+  body { margin: 0; background: #888; display: flex; gap: 24px; padding: 24px; flex-wrap: wrap; }
+  .phone {
+    width: 384px; height: 854px; position: relative; overflow: hidden;
+    background: var(--paper); color: var(--ink);
+    font-family: "Literata", serif; -webkit-font-smoothing: antialiased;
+  }
+  .status { height: 30px; display: flex; justify-content: space-between; align-items: center;
+    padding: 0 22px; font-size: 13px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+  .status .bat { width: 22px; height: 10px; border: 1.3px solid var(--ink-soft); border-radius: 3px; position: relative; }
+  .status .bat::after { content: ""; position: absolute; left: 2px; top: 2px; bottom: 2px; width: 13px; background: var(--ink-soft); border-radius: 1px; }
+
+  header { padding: 18px 28px 14px 28px; position: relative; }
+  .weekday { font-size: 17px; color: var(--ink-soft); letter-spacing: .01em; }
+  .date { font-size: 40px; font-weight: 500; line-height: 1.1; margin-top: 2px; letter-spacing: -.01em; }
+  .search { position: absolute; right: 26px; top: 26px; }
+
+  .entries { position: absolute; left: 0; right: 0; top: 140px; bottom: 140px; overflow: hidden; }
+  .entries.scrolled .inner { position: absolute; bottom: 0; left: 0; right: 0; }
+  .entry { display: grid; grid-template-columns: 50px 1fr; column-gap: 14px; padding: 0 30px 0 24px; margin-bottom: 26px; }
+  .time { font-size: 14px; color: var(--ink-soft); padding-top: 4px; font-variant-numeric: tabular-nums; }
+  .text { font-size: 17px; line-height: 1.55; hyphens: none; }
+  .foreign { color: var(--ink-soft); }
+  .wet { color: var(--ink-wet); }
+  .caret { display: inline-block; width: 1.6px; height: 1.15em; background: var(--ink); vertical-align: -0.2em; margin-left: 1px; }
+  .tags { font-size: 13.5px; color: var(--ink-soft); margin-top: 6px; }
+  .tags span + span { margin-left: 12px; }
+  .fade-top, .fade-bottom { position: absolute; left: 0; right: 0; height: 28px; pointer-events: none; }
+  .fade-top { top: 140px; background: linear-gradient(var(--paper), transparent); }
+  .fade-bottom { bottom: 140px; background: linear-gradient(transparent, var(--paper)); }
+
+  .bottom { position: absolute; left: 0; right: 0; bottom: 18px; height: 122px; }
+  .rec-label { text-align: center; font-size: 13.5px; color: var(--ink-soft); height: 20px; font-variant-numeric: tabular-nums; }
+  .controls { display: grid; grid-template-columns: 1fr 76px 1fr; align-items: center; margin-top: 6px; }
+  .langs { display: flex; gap: 26px; font-size: 15px; letter-spacing: .04em; color: var(--ink-soft); }
+  .langs.left { justify-content: flex-end; padding-right: 28px; }
+  .langs.right { justify-content: flex-start; padding-left: 28px; }
+  .langs .on { color: var(--ink); font-weight: 600; position: relative; }
+  .langs .on::after { content: ""; position: absolute; left: -2px; right: -2px; bottom: -5px; height: 1.6px; background: var(--ink); border-radius: 1px; transform: rotate(-2deg); }
+  .langs .off { opacity: .45; }
+  .mic { width: 72px; height: 72px; border-radius: 50%; border: 1.7px solid var(--ink); display: flex; align-items: center; justify-content: center; box-sizing: border-box; }
+  .mic.recording { background: var(--ink); }
+  .navpill { position: absolute; bottom: 7px; left: 50%; width: 108px; margin-left: -54px; height: 4px; border-radius: 2px; background: var(--ink-faint); }
+
+  /* календарь */
+  .cal-head { padding: 22px 28px 0; display: flex; align-items: baseline; justify-content: space-between; }
+  .cal-head .m { font-size: 40px; font-weight: 500; letter-spacing: -.01em; }
+  .cal-head .y { font-size: 17px; color: var(--ink-soft); margin-left: 10px; }
+  .cal-head .arrows { display: flex; gap: 26px; }
+  .grid { display: grid; grid-template-columns: repeat(7, 1fr); padding: 26px 18px 0; row-gap: 6px; }
+  .grid .wd { text-align: center; font-size: 13.5px; color: var(--ink-soft); padding-bottom: 12px; }
+  .grid .d { position: relative; height: 58px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-variant-numeric: tabular-nums; }
+  .grid .d.future { color: var(--ink-soft); opacity: .7; }
+  .grid .d svg { position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; transform: translate(-50%, -50%); }
+  .grid .d.has::after { content: ""; position: absolute; bottom: 14px; width: 4.5px; height: 4.5px; border-radius: 50%; background: var(--ink); }
+  .grid .d span { margin-top: -8px; }
+  .cal-note { padding: 26px 30px 0; font-size: 15px; color: var(--ink-soft); line-height: 1.5; }
+  .cal-note b { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+<body>
+<div id="out"></div>
+<script>
+const SEARCH = `<svg class="search" width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="9.5" cy="9.5" r="6.5"/><path d="M14.5 14.5 L19.5 19.5"/></svg>`;
+const MIC = (color) => `<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="${color}" stroke-width="1.7" stroke-linecap="round"><rect x="11" y="4" width="8" height="14" rx="4"/><path d="M7.5 14.5 a7.5 7.5 0 0 0 15 0"/><path d="M15 22 v4"/></svg>`;
+const STOP = `<svg width="22" height="22" viewBox="0 0 22 22"><rect x="3" y="3" width="16" height="16" rx="3" fill="var(--paper)"/></svg>`;
+const CIRCLE = `<svg width="50" height="50" viewBox="0 0 50 46" preserveAspectRatio="none" fill="none" stroke="var(--ink)" stroke-width="1.5" stroke-linecap="round"><path d="M27 4 C12 3 4 12 5 24 C6 36 17 43 28 42 C40 41 46 32 45 21 C44 10 35 4 22 6"/></svg>`;
+const ARROW_L = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M11.5 3.5 L6 9 L11.5 14.5"/></svg>`;
+const ARROW_R = `<svg width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 3.5 L12 9 L6.5 14.5"/></svg>`;
+
+const status = (t) => `<div class="status"><span>${t}</span><span class="bat"></span></div>`;
+const head = `<header><div class="weekday">понедельник</div><div class="date">9 ноября</div>${SEARCH}</header>`;
+const langs = (active, lock) => {
+  const all = ["RU","UK","EN","DE"];
+  const cls = (l) => l === active ? "on" : (lock ? "off" : "");
+  return [`<div class="langs left">${all.slice(0,2).map(l=>`<span class="${cls(l)}">${l}</span>`).join("")}</div>`,
+          `<div class="langs right">${all.slice(2).map(l=>`<span class="${cls(l)}">${l}</span>`).join("")}</div>`];
+};
+const bottom = (rec) => {
+  const [l, r] = langs("RU", rec);
+  return `<div class="bottom"><div class="rec-label">${rec ? "идёт запись · 1:24" : ""}</div>
+    <div class="controls">${l}<div class="mic ${rec ? "recording" : ""}">${rec ? STOP : MIC("var(--ink)")}</div>${r}</div></div>
+    <div class="navpill"></div>`;
+};
+
+const E1 = `<div class="entry"><div class="time">07:42</div><div><div class="text">Проснулся раньше будильника. За окном первый снег, всё белое и тихое. Решил не торопиться и выпить кофе у окна.</div><div class="tags"><span>#утро</span></div></div></div>`;
+const E2 = `<div class="entry"><div class="time">09:15</div><div><div class="text">Созвон с командой. Обсудили <span class="foreign">roadmap</span> на декабрь, Марина предложила перенести релиз на неделю. Думаю, она права.</div><div class="tags"><span>#работа</span></div></div></div>`;
+const E3 = `<div class="entry"><div class="time">13:30</div><div><div class="text">Зайшов до мами. Ґанок увесь у листі, посиділи там із чаєм. Їжак знову приходив у сад — мама каже, він уже як свій. Є відчуття, що осінь цього року довга.</div><div class="tags"><span>#семья</span></div></div></div>`;
+const E4 = `<div class="entry"><div class="time">18:05</div><div><div class="text">Quick run along the river after work. Cold, but the light over the water was beautiful.</div><div class="tags"><span>#спорт</span></div></div></div>`;
+const E5 = `<div class="entry"><div class="time">21:40</div><div><div class="text">Вечером долго думал о том, что сказала Марина. Наверное, стоит поговорить с ней завтра утром, <span class="wet">пока не начался весь этот</span><span class="caret"></span></div></div></div>`;
+
+const dayPage = (theme) => `<div class="phone ${theme}" id="day-${theme}">${status("21:12")}${head}
+  <div class="entries"><div class="inner">${E1}${E2}${E3}</div></div><div class="fade-bottom"></div>${bottom(false)}</div>`;
+
+const dictation = `<div class="phone light" id="dictation">${status("21:41")}${head}
+  <div class="entries scrolled"><div class="inner">${E2}${E3}${E4}${E5}</div></div><div class="fade-top"></div>${bottom(true)}</div>`;
+
+// ноябрь 2026: 1-е — воскресенье
+const withEntries = new Set([1,3,4,5,7,8,9]);
+let cells = ["пн","вт","ср","чт","пт","сб","вс"].map(w=>`<div class="wd">${w}</div>`).join("");
+for (let i = 0; i < 6; i++) cells += `<div class="d"></div>`;
+for (let d = 1; d <= 30; d++) {
+  const c = [d > 9 ? "future" : "", withEntries.has(d) ? "has" : ""].join(" ");
+  cells += `<div class="d ${c}">${d === 9 ? CIRCLE : ""}<span>${d}</span></div>`;
+}
+const calendar = `<div class="phone light" id="calendar">${status("21:13")}
+  <div class="cal-head"><div><span class="m">ноябрь</span><span class="y">2026</span></div><div class="arrows">${ARROW_L}${ARROW_R}</div></div>
+  <div class="grid">${cells}</div>
+  <div class="cal-note">7 дней с записями</div>
+  <div class="navpill"></div></div>`;
+
+document.getElementById("out").outerHTML = dayPage("light") + dictation + calendar + dayPage("dark");
+</script>
+</body>
+</html>
