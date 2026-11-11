@@ -19,6 +19,8 @@ import com.daybook.app.speech.Lang
 import com.daybook.app.speech.Recorder
 import com.daybook.app.speech.TextJoin
 import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 /** Какой экран открыт. */
 sealed interface Screen {
@@ -42,7 +44,16 @@ class DiaryState(private val context: Context) {
 
     var today by mutableStateOf(LocalDate.now())
         private set
-    val feed by derivedStateOf { Days.feed(entries.toList(), today) }
+    /** Прошлый день, в который сейчас пишет микрофон (null — сегодня). */
+    var target by mutableStateOf<LocalDate?>(null)
+        private set
+    val recordDate: LocalDate get() = target ?: today
+
+    /** День, в который идёт текущая запись (для прокрутки ленты). */
+    var recordingDate by mutableStateOf<LocalDate?>(null)
+        private set
+
+    val feed by derivedStateOf { Days.feed(entries.toList(), today, extra = target) }
 
     var expanded by mutableStateOf<LocalDate?>(null)
     var screen by mutableStateOf<Screen>(Screen.Feed)
@@ -89,6 +100,18 @@ class DiaryState(private val context: Context) {
         prefs.languageSwitch = on
     }
 
+    /** Писать в прошлый день (null или сегодня — обычный режим). */
+    fun chooseTarget(date: LocalDate?) {
+        if (recording) return
+        target = if (date == null || !date.isBefore(today)) null else date
+        expanded = recordDate
+    }
+
+    /** Снова «сегодня» (при сворачивании приложения). Идущую запись не трогает. */
+    fun resetTarget() {
+        target = null
+    }
+
     fun toggleDay(date: LocalDate) {
         expanded = if (expanded == date) null else date
     }
@@ -111,11 +134,19 @@ class DiaryState(private val context: Context) {
             )
             return
         }
-        val e = db.insert(System.currentTimeMillis(), lang.name, "")
+        // В прошлый день — тем же временем суток, что сейчас (его можно поправить).
+        val day = recordDate
+        val createdAt = if (target == null) {
+            System.currentTimeMillis()
+        } else {
+            day.atTime(LocalTime.now()).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+        }
+        val e = db.insert(createdAt, lang.name, "")
         entries += e
         recordingId = e.id
+        recordingDate = day
         recordingSince = SystemClock.elapsedRealtime()
-        expanded = today
+        expanded = day
         partial = ""
         val recLang = lang
         val r = Recorder(context, recLang, languageSwitch, object : Recorder.Listener {
@@ -160,6 +191,7 @@ class DiaryState(private val context: Context) {
                 val id = recordingId
                 recorder = null
                 recordingId = null
+                recordingDate = null
                 partial = ""
                 level = 0f
                 // Ничего не сказали — пустую запись не оставляем.

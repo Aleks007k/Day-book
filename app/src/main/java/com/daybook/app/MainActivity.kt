@@ -103,6 +103,8 @@ class MainActivity : ComponentActivity() {
         super.onStop()
         // Ушли с экрана — запись заканчивается, всё сказанное уже сохранено.
         state.stopRecording()
+        // Вернулись позже — снова пишем в «сегодня», чтобы не ошибиться днём.
+        state.resetTarget()
         stoppedAt = SystemClock.elapsedRealtime()
     }
 

@@ -31,6 +31,13 @@ class DaysAndPinTest {
     }
 
     @Test
+    fun chosenPastDayShownEvenIfEmpty() {
+        val entries = listOf(e(1, at(2026, 11, 11)))
+        val rows = Days.feed(entries, today = LocalDate.of(2026, 11, 11), zone = zone, extra = LocalDate.of(2026, 11, 9))
+        assertEquals(listOf("m-2026-11", "d-2026-11-11", "d-2026-11-09"), rows.map { it.key })
+    }
+
+    @Test
     fun entriesWord() {
         assertEquals("1 запись", Days.entriesWord(1))
         assertEquals("3 записи", Days.entriesWord(3))

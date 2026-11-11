@@ -62,6 +62,8 @@ object Icons {
         "M12 13a17 17 0 0 1 -2.3 8",
         "M17.3 18a20 20 0 0 0 .7 -4",
     )
+    val plus = line("M12 5v14", "M5 12h14", width = 2f)
+    val close = line("M6.5 6.5l11 11", "M17.5 6.5l-11 11")
     val clock = line("M12 3.5a8.5 8.5 0 1 0 0 17a8.5 8.5 0 1 0 0 -17z", "M12 7.5v4.5l3 2")
 }
 

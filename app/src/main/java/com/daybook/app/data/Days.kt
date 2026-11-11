@@ -36,12 +36,19 @@ object Days {
 
     /**
      * Лента: сверху новые дни, только дни с записями, плюс сегодняшний
-     * (даже пустой — в него пишет микрофон). Перед каждым новым месяцем —
+     * (даже пустой — в него пишет микрофон) и [extra] — выбранный прошлый день. Перед каждым новым месяцем —
      * разделитель.
      */
-    fun feed(entries: List<Entry>, today: LocalDate, zone: ZoneId = ZoneId.systemDefault()): List<FeedRow> {
+    fun feed(
+        entries: List<Entry>,
+        today: LocalDate,
+        zone: ZoneId = ZoneId.systemDefault(),
+        extra: LocalDate? = null,
+    ): List<FeedRow> {
         val byDate = entries.groupBy { dateOf(it.createdAt, zone) }.toMutableMap()
         if (today !in byDate) byDate[today] = emptyList()
+        // День, за который сейчас собираются дописать, виден даже пустым.
+        if (extra != null && extra !in byDate) byDate[extra] = emptyList()
         val rows = mutableListOf<FeedRow>()
         var lastMonth: Pair<Int, Int>? = null
         for (date in byDate.keys.sortedDescending()) {

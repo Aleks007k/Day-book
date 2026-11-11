@@ -3,6 +3,7 @@ package com.daybook.app.ui
 import android.os.SystemClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.gestures.animateScrollBy
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -27,6 +28,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
@@ -35,6 +38,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -49,6 +53,8 @@ import com.daybook.app.data.Entry
 import com.daybook.app.data.FeedRow
 import com.daybook.app.speech.Lang
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import java.time.LocalDate
 import java.time.ZoneId
 
 private val DOCK_SPACE = 100.dp
@@ -57,8 +63,11 @@ private val DOCK_SPACE = 100.dp
 @Composable
 fun FeedScreen(state: DiaryState, onMic: () -> Unit) {
     val p = LocalPalette.current
+    val context = LocalContext.current
     val listState = rememberLazyListState()
     val rows = state.feed
+    var choosing by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
     val expandedKey = state.expanded?.let { "d-$it" }
 
     // Строка раскрытого дня «прилипает» к верху, если день прокручен вверх.
@@ -73,7 +82,7 @@ fun FeedScreen(state: DiaryState, onMic: () -> Unit) {
     val live = state.recordingId?.let { state.entry(it) }
     LaunchedEffect(live?.text?.length, state.partial.length, state.recordingId) {
         if (state.recordingId == null) return@LaunchedEffect
-        val key = "d-${state.today}"
+        val key = "d-${state.recordingDate ?: state.today}"
         val info = listState.layoutInfo.visibleItemsInfo.firstOrNull { it.key == key } ?: run {
             val index = rows.indexOfFirst { it.key == key }
             if (index >= 0) listState.scrollToItem(index)
@@ -91,6 +100,8 @@ fun FeedScreen(state: DiaryState, onMic: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Txt("Day book", Type.title, p.text, Modifier.weight(1f))
+                SquareButton(Icons.plus, { choosing = true }, enabled = !state.recording)
+                Spacer(Modifier.width(8.dp))
                 SquareButton(Icons.settings, { state.screen = com.daybook.app.Screen.Settings }, enabled = !state.recording)
             }
             Box(Modifier.weight(1f)) {
@@ -124,11 +135,94 @@ fun FeedScreen(state: DiaryState, onMic: () -> Unit) {
         // Мягкое затухание ленты над кнопками.
         Column(Modifier.align(Alignment.BottomCenter).fillMaxWidth()) {
             Box(Modifier.fillMaxWidth().height(28.dp).background(Brush.verticalGradient(listOf(p.bg.copy(alpha = 0f), p.bg))))
-            Box(Modifier.fillMaxWidth().background(p.bg)) {
+            Column(Modifier.fillMaxWidth().background(p.bg)) {
+                state.target?.let { TargetBanner(it, state) }
                 Dock(state, onMic, Modifier.navigationBarsPadding().padding(start = 16.dp, end = 16.dp, top = 4.dp, bottom = 14.dp))
             }
         }
+        if (choosing) {
+            DayChooser(
+                state,
+                onPick = { d ->
+                    choosing = false
+                    state.chooseTarget(d)
+                    val i = state.feed.indexOfFirst { it.key == "d-$d" }
+                    if (i >= 0) scope.launch { listState.animateScrollToItem(i) }
+                },
+                onOther = {
+                    choosing = false
+                    pickPastDate(context, p.dark, state.today) { d ->
+                        state.chooseTarget(d)
+                        val i = state.feed.indexOfFirst { it.key == "d-$d" }
+                        if (i >= 0) scope.launch { listState.animateScrollToItem(i) }
+                    }
+                },
+                onDismiss = { choosing = false },
+            )
+        }
     }
+}
+
+/** «Запись за 10.11.2026 · вчера  ✕» — микрофон пишет в этот прошлый день. */
+@Composable
+private fun TargetBanner(date: LocalDate, state: DiaryState) {
+    val p = LocalPalette.current
+    Row(
+        Modifier.padding(horizontal = 16.dp).padding(top = 2.dp, bottom = 4.dp).fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp)).background(p.plate).padding(start = 14.dp, end = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Txt("Запись за ", Type.label, p.muted)
+        Txt(Days.dateText(date) + relativeDay(date, state.today), Type.labelBold, p.accentText, Modifier.weight(1f), maxLines = 1)
+        Box(
+            Modifier.size(40.dp).clip(RoundedCornerShape(12.dp))
+                .clickable(enabled = !state.recording) { state.chooseTarget(null) },
+            contentAlignment = Alignment.Center,
+        ) { if (!state.recording) Icon(Icons.close, p.muted, 20.dp) }
+    }
+}
+
+private fun relativeDay(date: LocalDate, today: LocalDate) = when (date) {
+    today.minusDays(1) -> " · вчера"
+    today.minusDays(2) -> " · позавчера"
+    else -> ""
+}
+
+/** Выбор прошлого дня: вчера, позавчера или любой другой. */
+@Composable
+private fun DayChooser(state: DiaryState, onPick: (LocalDate) -> Unit, onOther: () -> Unit, onDismiss: () -> Unit) {
+    val p = LocalPalette.current
+    Box(
+        Modifier.fillMaxSize().background(androidx.compose.ui.graphics.Color(0x99000000))
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onDismiss),
+        contentAlignment = Alignment.Center,
+    ) {
+        Column(
+            Modifier.padding(24.dp).fillMaxWidth().clip(RoundedCornerShape(22.dp)).background(p.open)
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Txt("За какой день запись?", Type.labelBold, p.text, Modifier.padding(start = 4.dp, bottom = 4.dp))
+            val y = state.today.minusDays(1)
+            val y2 = state.today.minusDays(2)
+            PlateButton("Вчера, ${Days.dateText(y)}", { onPick(y) }, Modifier.fillMaxWidth())
+            PlateButton("Позавчера, ${Days.dateText(y2)}", { onPick(y2) }, Modifier.fillMaxWidth())
+            PlateButton("Другой день…", onOther, Modifier.fillMaxWidth())
+            PlateButton("Отмена", onDismiss, Modifier.fillMaxWidth(), color = p.muted, center = true)
+        }
+    }
+}
+
+/** Системный календарь; будущие дни выбрать нельзя. */
+private fun pickPastDate(context: android.content.Context, dark: Boolean, today: LocalDate, onPick: (LocalDate) -> Unit) {
+    val theme = if (dark) android.R.style.Theme_DeviceDefault_Dialog_Alert else android.R.style.Theme_DeviceDefault_Light_Dialog_Alert
+    val start = today.minusDays(3)
+    val dialog = android.app.DatePickerDialog(context, theme, { _, y, m, d ->
+        onPick(LocalDate.of(y, m + 1, d))
+    }, start.year, start.monthValue - 1, start.dayOfMonth)
+    dialog.datePicker.maxDate = System.currentTimeMillis()
+    dialog.show()
 }
 
 @Composable
@@ -145,7 +239,7 @@ private fun DayPlate(day: Day, state: DiaryState) {
             MetaLine(day, state)
             val first = day.entries.firstOrNull { it.text.isNotBlank() }
             Txt(
-                first?.text?.replace('\n', ' ') ?: "Пока пусто — нажмите на микрофон внизу",
+                first?.text?.replace('\n', ' ') ?: if (day.date == state.today) "Пока пусто — нажмите на микрофон внизу" else "Пока пусто",
                 Type.preview,
                 if (first != null) p.soft else p.muted,
                 maxLines = 1,
@@ -164,6 +258,19 @@ private fun DayPlate(day: Day, state: DiaryState) {
                 for (e in day.entries) {
                     EntryText(e, state)
                     Spacer(Modifier.height(10.dp))
+                }
+                if (day.date.isBefore(state.today) && state.target != day.date && !state.recording) {
+                    Row(
+                        Modifier.clip(RoundedCornerShape(10.dp)).clickable { state.chooseTarget(day.date) }
+                            .padding(vertical = 6.dp, horizontal = 2.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Icon(Icons.plus, p.accentText, 18.dp)
+                        Spacer(Modifier.width(6.dp))
+                        Txt("Дописать за этот день", Type.labelBold, p.accentText)
+                    }
+                } else if (state.target == day.date && !state.recording) {
+                    Txt("Нажмите на микрофон — запись пойдёт в этот день.", Type.meta, p.muted)
                 }
             }
         }
