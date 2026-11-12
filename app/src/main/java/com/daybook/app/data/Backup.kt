@@ -19,7 +19,8 @@ object Backup {
                     .put("createdAt", e.createdAt)
                     .put("lang", e.lang)
                     .put("text", e.text)
-                    .put("updatedAt", e.updatedAt),
+                    .put("updatedAt", e.updatedAt)
+                    .put("tags", JSONArray(e.tags)),
             )
         }
         return JSONObject()
@@ -46,7 +47,12 @@ object Backup {
         for (i in 0 until arr.length()) {
             val o = arr.getJSONObject(i)
             val created = o.getLong("createdAt")
-            out += Entry(0, created, o.optString("lang", "RU"), o.optString("text", ""), o.optLong("updatedAt", created))
+            val tagsArr = o.optJSONArray("tags")
+            val tags = if (tagsArr == null) emptyList() else (0 until tagsArr.length()).map { tagsArr.optString(it) }
+            out += Entry(
+                0, created, o.optString("lang", "RU"), o.optString("text", ""), o.optLong("updatedAt", created),
+                AutoTags.parse(tags.joinToString(",")),
+            )
         }
         return out
     }

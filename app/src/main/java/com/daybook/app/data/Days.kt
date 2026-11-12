@@ -11,6 +11,8 @@ data class Entry(
     val lang: String,
     val text: String,
     val updatedAt: Long,
+    /** Теги без «#»: «работа», «семья»… */
+    val tags: List<String> = emptyList(),
 )
 
 /** День в ленте: дата и его записи по времени (раньше — выше). */

@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.daybook.app.data.AutoTags
 import com.daybook.app.data.Backup
 import com.daybook.app.data.Days
 import com.daybook.app.data.Db
@@ -41,6 +42,33 @@ class DiaryState(private val context: Context) {
     val prefs = Prefs(context)
 
     val entries = mutableStateListOf<Entry>().apply { addAll(db.all()) }
+
+    var autoTags by mutableStateOf(prefs.autoTags)
+        private set
+    var customTags by mutableStateOf(prefs.customTags)
+        private set
+
+    /** Все теги для выбора: словарь + свои. */
+    val allTags: List<String> get() = (AutoTags.NAMES + customTags).distinct()
+
+    init {
+        // Один раз: записям, сделанным до появления тегов, подбираем теги.
+        if (!prefs.tagsBackfilled) {
+            if (prefs.autoTags) {
+                for (i in entries.indices) {
+                    val e = entries[i]
+                    if (e.tags.isEmpty() && e.text.isNotBlank()) {
+                        val t = AutoTags.suggest(e.text)
+                        if (t.isNotEmpty()) {
+                            entries[i] = e.copy(tags = t)
+                            db.update(entries[i])
+                        }
+                    }
+                }
+            }
+            prefs.tagsBackfilled = true
+        }
+    }
 
     var today by mutableStateOf(LocalDate.now())
         private set
@@ -93,6 +121,36 @@ class DiaryState(private val context: Context) {
     fun chooseTheme(t: ThemeMode) {
         theme = t
         prefs.theme = t
+    }
+
+    fun chooseAutoTags(on: Boolean) {
+        autoTags = on
+        prefs.autoTags = on
+    }
+
+    fun toggleTag(id: Long, tag: String) {
+        val e = entry(id) ?: return
+        val t = if (tag in e.tags) e.tags - tag else e.tags + tag
+        save(e.copy(tags = t))
+    }
+
+    /** Свой тег: добавить в набор и сразу поставить записи. */
+    fun addCustomTag(id: Long, raw: String) {
+        val tag = AutoTags.clean(raw)
+        if (tag.isEmpty()) return
+        if (tag !in allTags) {
+            customTags = customTags + tag
+            prefs.customTags = customTags
+        }
+        val e = entry(id) ?: return
+        if (tag !in e.tags) save(e.copy(tags = e.tags + tag))
+    }
+
+    /** Подобрать теги заново по тексту (добавляет, ничего не убирает). */
+    fun suggestTags(id: Long) {
+        val e = entry(id) ?: return
+        val t = (e.tags + AutoTags.suggest(e.text)).distinct()
+        if (t != e.tags) save(e.copy(tags = t))
     }
 
     fun chooseLanguageSwitch(on: Boolean) {
@@ -194,8 +252,10 @@ class DiaryState(private val context: Context) {
                 recordingDate = null
                 partial = ""
                 level = 0f
-                // Ничего не сказали — пустую запись не оставляем.
-                if (id != null) entry(id)?.let { if (it.text.isBlank()) delete(it.id) }
+                // Ничего не сказали — пустую запись не оставляем; иначе — теги по словарю.
+                if (id != null) entry(id)?.let {
+                    if (it.text.isBlank()) delete(it.id) else if (autoTags) suggestTags(it.id)
+                }
             }
         })
         recorder = r

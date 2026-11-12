@@ -307,6 +307,13 @@ private fun MetaLine(day: Day, state: DiaryState) {
             Txt("·", Type.meta, p.muted)
             Txt(Days.entriesWord(n), Type.meta, p.muted)
         }
+        // Два самых частых тега дня.
+        val top = day.entries.flatMap { it.tags }.groupingBy { it }.eachCount()
+            .entries.sortedByDescending { it.value }.take(2).map { it.key }
+        for (tag in top) {
+            Txt("·", Type.meta, p.muted)
+            Chip(tag)
+        }
     }
 }
 
@@ -327,6 +334,14 @@ private fun EntryText(e: Entry, state: DiaryState) {
         }
         append("  ")
         withStyle(SpanStyle(color = p.text)) { append(e.text) }
+        for (tag in e.tags) {
+            append(" ")
+            val chip = SpanStyle(
+                fontFamily = Type.tag.fontFamily, fontWeight = Type.tag.fontWeight, fontSize = Type.tag.fontSize,
+                color = p.chipText, background = p.chipBg,
+            )
+            withStyle(chip) { append(if (p.chipBg.alpha > 0f) "\u2009#$tag\u2009" else "#$tag") }
+        }
         if (isLive) {
             val tail = state.partial
             if (tail.isNotBlank()) {

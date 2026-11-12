@@ -22,6 +22,21 @@ class Prefs(context: Context) {
         get() = p.getBoolean("switch", true)
         set(v) = p.edit().putBoolean("switch", v).apply()
 
+    /** Ставить теги самим по словарю (AutoTags). */
+    var autoTags: Boolean
+        get() = p.getBoolean("auto_tags", true)
+        set(v) = p.edit().putBoolean("auto_tags", v).apply()
+
+    /** Старым записям (до появления тегов) теги уже подобраны. */
+    var tagsBackfilled: Boolean
+        get() = p.getBoolean("tags_backfilled", false)
+        set(v) = p.edit().putBoolean("tags_backfilled", v).apply()
+
+    /** Свои теги владельца (кроме словаря), через запятую. */
+    var customTags: List<String>
+        get() = AutoTags.parse(p.getString("custom_tags", "") ?: "")
+        set(v) = p.edit().putString("custom_tags", AutoTags.store(v)).apply()
+
     /** Предупреждение «украинский идёт через интернет» уже показано. */
     var ukNoticeShown: Boolean
         get() = p.getBoolean("uk_notice", false)

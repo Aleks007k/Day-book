@@ -4,6 +4,16 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,6 +48,7 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 /** Правка одной записи: текст, дата и время, удаление. Всё сохраняется сразу. */
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun EditorScreen(state: DiaryState, entryId: Long) {
     val p = LocalPalette.current
@@ -48,6 +59,7 @@ fun EditorScreen(state: DiaryState, entryId: Long) {
         return
     }
     val isLive = e.id == state.recordingId
+    var picking by remember { mutableStateOf(false) }
     val zone = ZoneId.systemDefault()
     val dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(e.createdAt), zone)
     val dialogTheme = if (p.dark) android.R.style.Theme_DeviceDefault_Dialog_Alert
@@ -113,6 +125,89 @@ fun EditorScreen(state: DiaryState, entryId: Long) {
                 Txt("Идёт запись — новые слова добавляются в конец.", Type.meta, p.muted)
             }
         }
-        Spacer(Modifier.height(12.dp))
+        // Теги записи: нажатие на тег убирает его, «+ тег» — выбор из списка.
+        FlowRow(
+            Modifier.padding(horizontal = 12.dp, vertical = 10.dp).fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(6.dp),
+        ) {
+            for (tag in e.tags) TagPill("#$tag", selected = true) { state.toggleTag(e.id, tag) }
+            TagPill("+ тег", selected = false) { picking = true }
+        }
+        Spacer(Modifier.height(4.dp))
+    }
+    if (picking) TagPicker(state, e.id) { picking = false }
+}
+
+/** Ярлычок тега: выбранный — оранжевый, остальные — на плашке. */
+@Composable
+fun TagPill(text: String, selected: Boolean, onClick: () -> Unit) {
+    val p = LocalPalette.current
+    Box(
+        Modifier.clip(RoundedCornerShape(12.dp)).background(if (selected) p.button else p.plate)
+            .clickable(onClick = onClick).padding(horizontal = 12.dp, vertical = 8.dp),
+    ) { Txt(text, Type.labelBold, if (selected) p.onButton else p.text, maxLines = 1) }
+}
+
+/** Выбор тегов записи: весь набор, свой тег, «подобрать по тексту». */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun TagPicker(state: DiaryState, entryId: Long, onClose: () -> Unit) {
+    val p = LocalPalette.current
+    val e = state.entry(entryId) ?: return
+    var custom by remember { mutableStateOf("") }
+    Box(
+        Modifier.fillMaxSize().background(Color(0x99000000))
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onClose),
+        contentAlignment = Alignment.BottomCenter,
+    ) {
+        Column(
+            Modifier.fillMaxWidth().clip(RoundedCornerShape(topStart = 22.dp, topEnd = 22.dp)).background(p.open)
+                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) {}
+                .navigationBarsPadding().imePadding()
+                .padding(16.dp),
+        ) {
+            Txt("Теги записи", Type.labelBold, p.text, Modifier.padding(start = 4.dp, bottom = 10.dp))
+            FlowRow(
+                Modifier.fillMaxWidth().heightIn(max = 320.dp).verticalScroll(rememberScrollState()),
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                for (tag in state.allTags) TagPill("#$tag", selected = tag in e.tags) { state.toggleTag(entryId, tag) }
+            }
+            Spacer(Modifier.height(12.dp))
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    Modifier.weight(1f).height(48.dp).clip(RoundedCornerShape(14.dp)).background(p.plate)
+                        .padding(horizontal = 14.dp),
+                    contentAlignment = Alignment.CenterStart,
+                ) {
+                    BasicTextField(
+                        value = custom,
+                        onValueChange = { custom = it.take(30) },
+                        singleLine = true,
+                        textStyle = Type.label.copy(color = p.text),
+                        cursorBrush = SolidColor(p.button),
+                        modifier = Modifier.fillMaxWidth(),
+                        decorationBox = { inner ->
+                            Box {
+                                if (custom.isEmpty()) Txt("свой тег", Type.label, p.dim)
+                                inner()
+                            }
+                        },
+                    )
+                }
+                Spacer(Modifier.width(8.dp))
+                PrimaryButton("Добавить", {
+                    state.addCustomTag(entryId, custom)
+                    custom = ""
+                })
+            }
+            Spacer(Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                PlateButton("Подобрать по тексту", { state.suggestTags(entryId) }, Modifier.weight(1f), center = true)
+                PrimaryButton("Готово", onClose, Modifier.weight(1f))
+            }
+        }
     }
 }
