@@ -44,9 +44,22 @@ class AutoTagsTest {
 
     @Test
     fun atMostThreeMostFrequentFirst() {
-        val t = tags("Работа, работа, офис и коллеги. Потом спортзал? Нет, тренировка. Купил хлеб в магазине. Поел пиццу.")
+        val t = tags("Работа, работа, офис и коллеги. Потом спортзал? Нет, тренировка. Позвонил маме. Думал о смысле.")
         assertTrue(t.size <= AutoTags.MAX_TAGS)
         assertEquals("работа", t.first())
+    }
+
+    @Test
+    fun ownerTopics() {
+        assertTrue("бизнес" in tags("Сегодня закрыли сделку с новым клиентом, прибыль пока маленькая."))
+        assertTrue("цели" in tags("Хочу добиться своей мечты, у меня есть цель на этот год."))
+        assertTrue("отношения" in tags("Поссорились с женой, потом долго мирились."))
+        assertTrue("дети" in tags("Сын сегодня впервые сам прочитал книгу."))
+        assertTrue("философия" in tags("Думаю о смысле жизни: зачем мы живём и как жить честно."))
+        assertTrue("душа" in tags("На душе спокойно, благодарен Богу за этот день."))
+        assertTrue("боль" in tags("Очень больно от этой обиды, чувствую предательство."))
+        assertTrue("отношения" in tags("Говорили с дружиною про наші стосунки."))
+        assertTrue("бизнес" in tags("We signed a contract with a new client, the startup is growing."))
     }
 
     @Test
