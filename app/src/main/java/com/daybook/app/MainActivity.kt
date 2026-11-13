@@ -47,7 +47,7 @@ class MainActivity : ComponentActivity() {
         } else {
             state.notice = Notice(
                 "Без доступа к микрофону дневник не сможет записывать голос. " +
-                    "Разрешите его: Настройки телефона → Приложения → Day book → Разрешения → Микрофон.",
+                    "Разрешите его: Настройки телефона → Приложения → Day-book → Разрешения → Микрофон.",
             )
         }
     }
@@ -121,7 +121,7 @@ class MainActivity : ComponentActivity() {
     private fun showBiometric() {
         try {
             BiometricPrompt.Builder(this)
-                .setTitle("Day book")
+                .setTitle("Day-book")
                 .setSubtitle("Открыть дневник")
                 .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_WEAK)
                 .setNegativeButton("Ввести код", mainExecutor) { _, _ -> }

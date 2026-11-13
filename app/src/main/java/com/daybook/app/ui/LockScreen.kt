@@ -100,7 +100,7 @@ fun LockScreen(lock: LockState, biometric: Boolean, onBiometric: () -> Unit) {
     }
     val wait = ((lock.pausedUntil - now + 999) / 1000).coerceAtLeast(0)
     PinPad(
-        title = "Day book",
+        title = "Day-book",
         subtitle = when {
             wait > 0 -> "Подождите $wait с"
             lock.error != null -> lock.error!!

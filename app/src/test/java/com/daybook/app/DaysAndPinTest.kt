@@ -50,6 +50,9 @@ class DaysAndPinTest {
     @Test
     fun dateText() {
         assertEquals("09.11.2026", Days.dateText(LocalDate.of(2026, 11, 9)))
+        assertEquals("Пн", Days.weekdayShort(LocalDate.of(2026, 11, 9)))
+        assertEquals("Вт", Days.weekdayShort(LocalDate.of(2026, 11, 10)))
+        assertEquals("Вс", Days.weekdayShort(LocalDate.of(2026, 11, 15)))
     }
 
     @Test

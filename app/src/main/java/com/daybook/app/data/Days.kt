@@ -84,6 +84,11 @@ object Days {
 
     fun monthTitle(year: Int, month: Int) = "${MONTHS[month - 1]} $year"
 
+    private val WEEKDAYS = listOf("Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс")
+
+    /** «Вт» */
+    fun weekdayShort(date: LocalDate) = WEEKDAYS[date.dayOfWeek.value - 1]
+
     /** 09.11.2026 */
     fun dateText(date: LocalDate) = "%02d.%02d.%04d".format(date.dayOfMonth, date.monthValue, date.year)
 }

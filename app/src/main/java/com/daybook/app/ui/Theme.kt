@@ -105,6 +105,8 @@ object Type {
     val title = TextStyle(fontFamily = Fonts.Unbounded, fontWeight = FontWeight.Bold, fontSize = 26.sp, letterSpacing = (-0.3).sp)
     val screenTitle = TextStyle(fontFamily = Fonts.Unbounded, fontWeight = FontWeight.Bold, fontSize = 20.sp, letterSpacing = (-0.2).sp)
     val month = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.Bold, fontSize = 12.sp, letterSpacing = 1.3.sp)
+    /** «Вт 11.11.2026» в плашке дня — чуть крупнее остальной строки. */
+    val dayDate = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.Bold, fontSize = 13.5.sp, lineHeight = 17.sp, letterSpacing = 0.1.sp)
     val meta = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, lineHeight = 16.sp)
     val label = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, lineHeight = 19.sp)
     val labelBold = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 20.sp)

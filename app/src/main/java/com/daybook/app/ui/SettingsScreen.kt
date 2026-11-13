@@ -190,7 +190,7 @@ fun SettingsScreen(
             PlateButton("Восстановить из копии", onRestore, Modifier.fillMaxWidth())
 
             Spacer(Modifier.height(18.dp))
-            Txt("Day book ${BuildConfig.VERSION_NAME}", Type.meta, p.dim, Modifier.padding(horizontal = 6.dp))
+            Txt("Day-book ${BuildConfig.VERSION_NAME}", Type.meta, p.dim, Modifier.padding(horizontal = 6.dp))
             Spacer(Modifier.height(24.dp))
         }
     }

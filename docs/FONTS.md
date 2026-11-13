@@ -5,7 +5,7 @@
 
 | Файл | Шрифт | Где используется |
 |---|---|---|
-| unbounded_700.ttf | Unbounded Bold | заголовок «Day book», время, кнопки языков, таймер |
+| unbounded_700.ttf | Unbounded Bold | заголовок «Day-book», время, кнопки языков, таймер |
 | manrope_600.ttf, manrope_700.ttf | Manrope | мелкие подписи: дата, «4 записи», месяцы |
 | rubik_400.ttf, rubik_500.ttf | Rubik | текст записей |
 

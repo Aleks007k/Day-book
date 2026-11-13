@@ -99,7 +99,7 @@ fun FeedScreen(state: DiaryState, onMic: () -> Unit) {
                 Modifier.fillMaxWidth().padding(start = 20.dp, end = 16.dp, top = 8.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Txt("Day book", Type.title, p.text, Modifier.weight(1f))
+                Txt("Day-book", Type.title, p.text, Modifier.weight(1f))
                 SquareButton(Icons.plus, { choosing = true }, enabled = !state.recording)
                 Spacer(Modifier.width(8.dp))
                 SquareButton(Icons.settings, { state.screen = com.daybook.app.Screen.Settings }, enabled = !state.recording)
@@ -289,12 +289,12 @@ private fun DayHeader(day: Day, state: DiaryState, open: Boolean, onClick: () ->
     }
 }
 
-/** «09.11.2026 · сегодня · 4 записи» */
+/** «Вт 11.11.2026 · сегодня · 4 записи · работа» — число записей и теги оранжевым. */
 @Composable
 private fun MetaLine(day: Day, state: DiaryState) {
     val p = LocalPalette.current
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
-        Txt(Days.dateText(day.date), Type.meta, p.soft)
+        Txt(Days.weekdayShort(day.date) + " " + Days.dateText(day.date), Type.dayDate, p.soft)
         if (day.date == state.today) {
             Txt("·", Type.meta, p.muted)
             Chip("сегодня")
@@ -305,7 +305,7 @@ private fun MetaLine(day: Day, state: DiaryState) {
         val n = day.entries.count { it.text.isNotBlank() || it.id == state.recordingId }
         if (n > 0) {
             Txt("·", Type.meta, p.muted)
-            Txt(Days.entriesWord(n), Type.meta, p.muted)
+            Chip(Days.entriesWord(n))
         }
         // Два самых частых тега дня.
         val top = day.entries.flatMap { it.tags }.groupingBy { it }.eachCount()
