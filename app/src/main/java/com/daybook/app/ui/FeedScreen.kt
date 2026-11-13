@@ -289,30 +289,16 @@ private fun DayHeader(day: Day, state: DiaryState, open: Boolean, onClick: () ->
     }
 }
 
-/** «Вт 11.11.2026 · сегодня · 4 записи · работа» — число записей и теги оранжевым. */
+/** «Вт 11.11.2026 · 2 записи» — и всё (просьба владельца); число записей оранжевым. */
 @Composable
 private fun MetaLine(day: Day, state: DiaryState) {
     val p = LocalPalette.current
     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
         Txt(Days.weekdayShort(day.date) + " " + Days.dateText(day.date), Type.dayDate, p.soft)
-        if (day.date == state.today) {
-            Txt("·", Type.meta, p.muted)
-            Chip("сегодня")
-        } else if (day.date == state.today.minusDays(1)) {
-            Txt("·", Type.meta, p.muted)
-            Txt("вчера", Type.meta, p.muted)
-        }
         val n = day.entries.count { it.text.isNotBlank() || it.id == state.recordingId }
         if (n > 0) {
             Txt("·", Type.meta, p.muted)
             Chip(Days.entriesWord(n))
-        }
-        // Два самых частых тега дня.
-        val top = day.entries.flatMap { it.tags }.groupingBy { it }.eachCount()
-            .entries.sortedByDescending { it.value }.take(2).map { it.key }
-        for (tag in top) {
-            Txt("·", Type.meta, p.muted)
-            Chip(tag)
         }
     }
 }

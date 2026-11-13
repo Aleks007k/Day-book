@@ -7,8 +7,8 @@
 |---|---|---|
 | unbounded_700.ttf | Unbounded Bold | заголовок «Day-book», время, кнопки языков, таймер |
 | manrope_600.ttf, manrope_700.ttf | Manrope | мелкие подписи: дата, «4 записи», месяцы |
-| rubik_400.ttf, rubik_500.ttf | Rubik | текст записей |
+| montserrat_400.ttf, montserrat_500.ttf | Montserrat | текст записей (выбор владельца 13.11.2026; до этого был Rubik) |
 
-Rubik нарезан из переменного шрифта google/fonts (ofl/rubik/Rubik[wght].ttf)
-на начертания 400 и 500; все файлы урезаны до латиницы, кириллицы
+Montserrat нарезан из переменного шрифта google/fonts
+(ofl/montserrat/Montserrat[wght].ttf) на начертания 400 и 500; все файлы урезаны до латиницы, кириллицы
 (включая і ї є ґ) и знаков препинания, чтобы приложение было легче.

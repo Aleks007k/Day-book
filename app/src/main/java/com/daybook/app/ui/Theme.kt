@@ -43,22 +43,22 @@ data class Palette(
 
 val DarkPalette = Palette(
     dark = true,
-    bg = Color(0xFF0D0C0B),
-    plate = Color(0xFF221F1B),
-    open = Color(0xFF2B2722),
-    track = Color(0xFF36322C),
-    line = Color(0xFF3A352F),
+    bg = Color(0xFF0C0C0E),
+    plate = Color(0xFF1D1D21),
+    open = Color(0xFF26262B),
+    track = Color(0xFF313136),
+    line = Color(0xFF3A3A40),
     text = Color(0xFFFFFCF6),
     soft = Color(0xFFFFFAF1),
-    muted = Color(0xFFCFC7BA),
-    dim = Color(0xFF6E6962),
+    muted = Color(0xFFB4B4BA),
+    dim = Color(0xFF66666C),
     accentText = Color(0xFFFFA01A),
     chipBg = Color.Transparent,
     chipText = Color(0xFFFFA01A),
     button = Color(0xFFFFA01A),
     onButton = Color(0xFF1F1200),
     rec = Color(0xFFFF3B30),
-    wet = Color(0xFFCFC7BA),
+    wet = Color(0xFFB4B4BA),
 )
 
 val LightPalette = Palette(
@@ -93,10 +93,10 @@ object Fonts {
         Font(R.font.manrope_700, FontWeight.Bold),
     )
 
-    /** Текст записей. */
-    val Rubik = FontFamily(
-        Font(R.font.rubik_400, FontWeight.Normal),
-        Font(R.font.rubik_500, FontWeight.Medium),
+    /** Текст записей (Montserrat — выбор владельца 13.11.2026). */
+    val Body = FontFamily(
+        Font(R.font.montserrat_400, FontWeight.Normal),
+        Font(R.font.montserrat_500, FontWeight.Medium),
     )
 }
 
@@ -110,8 +110,8 @@ object Type {
     val meta = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.SemiBold, fontSize = 12.sp, lineHeight = 16.sp)
     val label = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.SemiBold, fontSize = 14.sp, lineHeight = 19.sp)
     val labelBold = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.Bold, fontSize = 15.sp, lineHeight = 20.sp)
-    val preview = TextStyle(fontFamily = Fonts.Rubik, fontSize = 17.sp, lineHeight = 21.sp, letterSpacing = (-0.015).em)
-    val entry = TextStyle(fontFamily = Fonts.Rubik, fontSize = 17.5.sp, lineHeight = 23.sp)
+    val preview = TextStyle(fontFamily = Fonts.Body, fontSize = 17.sp, lineHeight = 21.sp, letterSpacing = (-0.015).em)
+    val entry = TextStyle(fontFamily = Fonts.Body, fontSize = 17.5.sp, lineHeight = 23.sp)
     val time = TextStyle(fontFamily = Fonts.Unbounded, fontWeight = FontWeight.Bold, fontSize = 12.5.sp)
     val tag = TextStyle(fontFamily = Fonts.Manrope, fontWeight = FontWeight.Bold, fontSize = 12.sp)
     val seg = TextStyle(fontFamily = Fonts.Unbounded, fontWeight = FontWeight.Bold, fontSize = 13.5.sp)
