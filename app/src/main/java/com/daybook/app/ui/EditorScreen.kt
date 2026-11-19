@@ -36,7 +36,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import com.daybook.app.DiaryState
 import com.daybook.app.Notice
@@ -60,6 +62,7 @@ fun EditorScreen(state: DiaryState, entryId: Long) {
     }
     val isLive = e.id == state.recordingId
     var picking by remember { mutableStateOf(false) }
+    val clipboard = LocalClipboardManager.current
     val zone = ZoneId.systemDefault()
     val dt = LocalDateTime.ofInstant(Instant.ofEpochMilli(e.createdAt), zone)
     val dialogTheme = if (p.dark) android.R.style.Theme_DeviceDefault_Dialog_Alert
@@ -92,6 +95,9 @@ fun EditorScreen(state: DiaryState, entryId: Long) {
                 )
             }
             Spacer(Modifier.width(8.dp))
+            // Весь текст записи в буфер обмена.
+            SquareButton(Icons.copy, { clipboard.setText(AnnotatedString(e.text)) }, enabled = e.text.isNotBlank())
+            Spacer(Modifier.width(8.dp))
             SquareButton(Icons.trash, {
                 state.notice = Notice("Удалить эту запись? Вернуть её будет нельзя.", "Удалить") {
                     state.screen = Screen.Feed
@@ -99,10 +105,11 @@ fun EditorScreen(state: DiaryState, entryId: Long) {
                 }
             }, enabled = !isLive)
         }
-        Column(
+        // Поле правки само прокручивается (без внешней прокрутки — иначе она
+        // перехватывает движение пальца и выделение текста не работает).
+        Box(
             Modifier.weight(1f).padding(horizontal = 8.dp).fillMaxWidth()
                 .clip(RoundedCornerShape(16.dp)).background(p.open)
-                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 12.dp, vertical = 12.dp),
         ) {
             BasicTextField(
@@ -110,7 +117,7 @@ fun EditorScreen(state: DiaryState, entryId: Long) {
                 onValueChange = { state.setText(e.id, it) },
                 textStyle = Type.entry.copy(color = p.text),
                 cursorBrush = SolidColor(p.button),
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxSize(),
                 decorationBox = { inner ->
                     Box {
                         if (e.text.isEmpty()) Txt("Текст записи", Type.entry, p.dim)
@@ -118,10 +125,10 @@ fun EditorScreen(state: DiaryState, entryId: Long) {
                     }
                 },
             )
-            if (isLive) {
-                Spacer(Modifier.height(8.dp))
-                if (state.partial.isNotBlank()) Txt(state.partial, Type.entry, p.wet)
-                Spacer(Modifier.height(6.dp))
+        }
+        if (isLive) {
+            Column(Modifier.padding(horizontal = 20.dp, vertical = 6.dp)) {
+                if (state.partial.isNotBlank()) Txt(state.partial, Type.entry, p.wet, maxLines = 3)
                 Txt("Идёт запись — новые слова добавляются в конец.", Type.meta, p.muted)
             }
         }

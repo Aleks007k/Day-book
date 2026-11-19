@@ -38,6 +38,19 @@ class DaysAndPinTest {
     }
 
     @Test
+    fun dayAsTextForCopy() {
+        val day = com.daybook.app.data.Day(
+            LocalDate.of(2026, 11, 10),
+            listOf(
+                Entry(1, at(2026, 11, 10, 7), "RU", "Утро.", 0),
+                Entry(2, at(2026, 11, 10, 9), "RU", " ", 0), // пустая — пропускается
+                Entry(3, at(2026, 11, 10, 21), "UK", "Вечір.", 0),
+            ),
+        )
+        assertEquals("Вт 10.11.2026\n\n7:00 Утро.\n\n21:00 Вечір.", Days.dayAsText(day, zone))
+    }
+
+    @Test
     fun entriesWord() {
         assertEquals("1 запись", Days.entriesWord(1))
         assertEquals("3 записи", Days.entriesWord(3))

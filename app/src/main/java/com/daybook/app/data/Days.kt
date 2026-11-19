@@ -89,6 +89,18 @@ object Days {
     /** «Вт» */
     fun weekdayShort(date: LocalDate) = WEEKDAYS[date.dayOfWeek.value - 1]
 
+    /**
+     * Весь день одним текстом — для кнопки «копировать»:
+     * «Вт 11.11.2026», пустая строка, затем «7:42 текст» по записям.
+     */
+    fun dayAsText(day: Day, zone: ZoneId = ZoneId.systemDefault()): String = buildString {
+        append(weekdayShort(day.date)).append(' ').append(dateText(day.date))
+        for (e in day.entries.filter { it.text.isNotBlank() }) {
+            val t = Instant.ofEpochMilli(e.createdAt).atZone(zone).toLocalTime()
+            append("\n\n").append("%d:%02d".format(t.hour, t.minute)).append(' ').append(e.text.trim())
+        }
+    }
+
     /** 09.11.2026 */
     fun dateText(date: LocalDate) = "%02d.%02d.%04d".format(date.dayOfMonth, date.monthValue, date.year)
 }

@@ -1,5 +1,7 @@
 package com.daybook.app.ui
 
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Immutable
@@ -121,5 +123,11 @@ object Type {
 
 @Composable
 fun DayBookTheme(palette: Palette, content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalPalette provides palette, content = content)
+    // Выделение текста (долгое нажатие) — оранжевыми ручками и подсветкой.
+    val selection = TextSelectionColors(handleColor = palette.button, backgroundColor = palette.button.copy(alpha = 0.35f))
+    CompositionLocalProvider(
+        LocalPalette provides palette,
+        LocalTextSelectionColors provides selection,
+        content = content,
+    )
 }

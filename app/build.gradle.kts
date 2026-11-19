@@ -14,8 +14,8 @@ android {
         // которые появились именно в этой версии.
         minSdk = 33
         targetSdk = 35
-        versionCode = 13
-        versionName = "0.3.1"
+        versionCode = 14
+        versionName = "0.3.2"
     }
 
     // Подпись релиза: один постоянный ключ для всех версий.

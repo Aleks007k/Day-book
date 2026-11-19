@@ -38,6 +38,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.AnnotatedString
@@ -255,9 +257,14 @@ private fun DayPlate(day: Day, state: DiaryState) {
                 if (day.entries.isEmpty()) {
                     Txt("Пока пусто. Нажмите на микрофон внизу и говорите.", Type.entry, p.muted)
                 }
-                for (e in day.entries) {
-                    EntryText(e, state)
-                    Spacer(Modifier.height(10.dp))
+                // Долгое нажатие — выделить и скопировать; короткое — открыть запись.
+                SelectionContainer {
+                    Column {
+                        for (e in day.entries) {
+                            EntryText(e, state)
+                            Spacer(Modifier.height(10.dp))
+                        }
+                    }
                 }
                 if (day.date.isBefore(state.today) && state.target != day.date && !state.recording) {
                     Row(
@@ -285,6 +292,16 @@ private fun DayHeader(day: Day, state: DiaryState, open: Boolean, onClick: () ->
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(Modifier.weight(1f)) { MetaLine(day, state) }
+        if (open && day.entries.any { it.text.isNotBlank() }) {
+            // Весь день в буфер: дата и записи по времени.
+            val clipboard = LocalClipboardManager.current
+            Box(
+                Modifier.size(34.dp).clip(RoundedCornerShape(10.dp))
+                    .clickable { clipboard.setText(AnnotatedString(Days.dayAsText(day))) },
+                contentAlignment = Alignment.Center,
+            ) { Icon(Icons.copy, p.muted, 19.dp) }
+            Spacer(Modifier.width(6.dp))
+        }
         if (open) Icon(Icons.up, p.muted, 20.dp)
     }
 }
